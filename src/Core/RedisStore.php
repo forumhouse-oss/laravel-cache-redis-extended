@@ -5,26 +5,18 @@ namespace FHTeam\LaravelRedisCache\Core;
 use Carbon\Carbon;
 use Closure;
 use DateTime;
-use FHTeam\LaravelRedisCache\Coder\CoderManager;
-use FHTeam\LaravelRedisCache\Tag\TagReader;
+use Exception;
+use FHTeam\LaravelRedisCache\DataLayer\Wrapper;
 use Illuminate\Cache\TaggableStore;
 use Illuminate\Redis\Database as Redis;
 
+/**
+ * Class RedisStore
+ *
+ * @package FHTeam\LaravelRedisCache\Core
+ */
 class RedisStore extends TaggableStore
 {
-    /*
-     * Fields of the serialized object in cache
-     */
-
-    /** When this object expire: int */
-    const IDX_EXPIRES = 'expires';
-
-    /** Object tags: string name => int version */
-    const IDX_TAGS = 'tags';
-
-    /** Object value: mixed */
-    const IDX_RAW_VALUE = 'value';
-
     /**
      * The Redis database connection.
      *
@@ -47,7 +39,17 @@ class RedisStore extends TaggableStore
     protected $connection;
 
     /**
-     * @var array
+     * @var Wrapper
+     */
+    protected $wrapper;
+
+    /**
+     * @var TagManager
+     */
+    protected $tagManager;
+
+    /**
+     * @var string[] Tag names, that are attached to this store instance
      */
     protected $tags;
 
@@ -62,7 +64,9 @@ class RedisStore extends TaggableStore
     {
         $this->redis = $redis;
         $this->connection = $connection;
-        $this->prefix = strlen($prefix) > 0 ? $prefix . ':' : '';
+        $this->prefix = $this->makePrefix($prefix);
+        $this->tagManager = new TagManager($redis);
+        $this->wrapper = new Wrapper($redis, $this->tagManager, $this->prefix);
     }
 
     /**
@@ -81,49 +85,106 @@ class RedisStore extends TaggableStore
         }
     }
 
+    /**
+     * Checks if the key exists. This maps to Redis EXISTS command to prevent excessive traffic
+     *
+     * @param string $key
+     *
+     * @return bool
+     */
     public function has($key)
     {
-        return null !== $this->get($key);
+        return $this->connection()->exists($this->prefix . $key);
     }
 
-    public function add($key)
+    /**
+     * @param string $key
+     * @param mixed  $value
+     * @param int    $minutes
+     */
+    public function add($key, $value, $minutes)
     {
-        //TODO: Redis logic
+        if (!is_array($key)) {
+            $key = [$key => $value];
+        }
+
+        $this->mset($key, $minutes, true);
     }
 
+    /**
+     * Get an item from the cache, or store the default value.
+     *
+     * @param  string        $key
+     * @param  \DateTime|int $minutes
+     * @param  \Closure      $callback
+     *
+     * @return mixed
+     */
     public function remember($key, $minutes, Closure $callback)
     {
+        // If the item exists in the cache we will just return this immediately
+        // otherwise we will execute the given Closure and cache the result
+        // of that execution for the given number of minutes in storage.
+        if (!is_null($value = $this->get($key))) {
+            return $value;
+        }
 
+        $this->put($key, $value = $callback(), $minutes);
+
+        return $value;
     }
 
+    /**
+     * Get an item from the cache, or store the default value forever.
+     *
+     * @param  string   $key
+     * @param  \Closure $callback
+     *
+     * @return mixed
+     */
     public function rememberForever($key, Closure $callback)
     {
+        // If the item exists in the cache we will just return this immediately
+        // otherwise we will execute the given Closure and cache the result
+        // of that execution for the given number of minutes. It's easy.
+        if (!is_null($value = $this->get($key))) {
+            return $value;
+        }
 
+        $this->put($key, $value = $callback(), 0);
+
+        return $value;
     }
 
+    /**
+     * Get an item from the cache, or store the default value forever.
+     *
+     * @param  string   $key
+     * @param  \Closure $callback
+     *
+     * @return mixed
+     */
     public function sear($key, Closure $callback)
     {
-
+        return $this->rememberForever($key, $callback);
     }
 
     /**
      * Store an item in the cache for a given number of minutes.
      *
-     * @param array|string $key
-     * @param  mixed       $value
-     * @param  int         $minutes
+     * @param array|string  $key
+     * @param  mixed        $value
+     * @param  DateTime|int $minutes
      *
      * @return void
      */
     public function put($key, $value, $minutes)
     {
-        $minutes = max(1, $minutes);
-
-        if (is_array($key)) {
-            $this->mset($key, $minutes);
-        } else {
-            $this->mset([$key => $value], $minutes);
+        if (!is_array($key)) {
+            $key = [$key => $value];
         }
+
+        $this->mset($key, $minutes);
     }
 
     /**
@@ -164,21 +225,21 @@ class RedisStore extends TaggableStore
      */
     public function forever($key, $value)
     {
-        $value = is_numeric($value) ? $value : serialize($value);
-
-        $this->connection()->set($this->prefix . $key, $value);
+        $this->put($key, $value, 0);
     }
 
     /**
-     * Remove an item from the cache.
+     * Remove an item or items from the cache. This batches multiple key deletions into a single Redis DEL command
      *
-     * @param  string $key
+     * @param array|string $key
      *
      * @return void
      */
     public function forget($key)
     {
-        $this->connection()->del($this->prefix . $key);
+        $key = (array)$key;
+        $key = $this->getPrefixedKeys($key);
+        $this->connection()->del($key);
     }
 
     /**
@@ -188,8 +249,11 @@ class RedisStore extends TaggableStore
      */
     public function flush()
     {
-        //TODO: with tags flushes only them
-        $this->connection()->flushdb();
+        if (!empty($this->tags)) {
+            $this->tagManager->flushTags($this->tags);
+        } else {
+            $this->connection()->flushdb();
+        }
     }
 
     /**
@@ -201,8 +265,8 @@ class RedisStore extends TaggableStore
      */
     public function tags($names)
     {
-        return (new static($this->redis, $this->prefix,
-            $this->connection))->setTags(is_array($names) ? $names : func_get_args());
+        $self = new static($this->redis, $this->prefix, $this->connection);
+        return $self->setTags(is_array($names) ? $names : func_get_args());
     }
 
     /**
@@ -238,16 +302,6 @@ class RedisStore extends TaggableStore
     }
 
     /**
-     * Get the cache key prefix.
-     *
-     * @return string
-     */
-    public function getPrefix()
-    {
-        return $this->prefix;
-    }
-
-    /**
      * @param array $keys
      *
      * @return array
@@ -258,110 +312,119 @@ class RedisStore extends TaggableStore
             return $this->prefix . $value;
         }, $keys);
 
-        $keyValues = $this->connection()->mget($keys);
+        $data = $this->connection()->mget($keys);
 
-        return array_map([$this, 'unwrapValue'], $keyValues);
+        return $this->wrapper->unwrapData($data);
     }
 
     /**
      * @param array $values
      * @param int   $minutes
+     * @param bool  $nxOnly Only set non-existent keys
      *
-     * @return void
+     * @throws Exception
+     * @throws \Predis\Response\ServerException
+     * @throws \Predis\Transaction\AbortedMultiExecException
      */
-    public function mset(array $values, $minutes)
+    public function mset(array $values, $minutes, $nxOnly = false)
     {
-        $result = [];
-        $minutes = $this->getMinutes($minutes) * 60;
-        foreach ($values as $key => $val) {
-            $result[$this->prefix . $key] = $this->wrapValue($val, $minutes);
+        $seconds = $this->getTtlInSeconds($minutes);
+        $result = $this->wrapper->wrapData($values, $seconds, $this->tags);
+
+        // Executing MULTI only if we transfer more than one item
+        $redis = ((count($values) > 1) ? $this->connection()->transaction() : $this->connection());
+
+        //Building MSET command with arguments we need
+        $arguments = [
+            'key' => '', // Arg #1
+            'value' => '', // Arg #2
+        ];
+
+        if (0 !== $minutes) {
+            $arguments['ex'] = 'EX'; // Arg #3
+            $arguments['seconds'] = $seconds; // Arg #4
         }
 
-        $transaction = $keyValues = $this->connection()->transaction();
-        foreach ($result as $key => $value) {
-            $transaction->setex($key, $minutes, $value);
+        if ($nxOnly) {
+            $arguments['nx'] = 'NX'; // Arg #5
         }
-        $transaction->execute();
+
+        foreach ($result as $key => $value) {
+            $arguments['key'] = $key;
+            $arguments['value'] = $value;
+
+            call_user_func_array([$redis, 'set'], $arguments);
+        }
+
+        // Executing Redis EXEC if needed
+        if (count($values) > 1) {
+            $redis->execute();
+        }
     }
 
     /**
      * Calculate the number of minutes with the given duration.
      *
-     * @param  \DateTime|int $duration
+     * @param  \DateTime|int $minutes Either the exact date at which the item expire, or ttl in minutes
      *
-     * @return int|null
+     * @return int A number of seconds to use in Redis commands
+     * @throws Exception
      */
-    protected function getMinutes($duration)
+    protected function getTtlInSeconds($minutes)
     {
-        if ($duration instanceof DateTime) {
-            $fromNow = Carbon::instance($duration)->diffInMinutes();
-
-            return $fromNow > 0 ? $fromNow : null;
+        if ($minutes instanceof DateTime) {
+            $fromNow = Carbon::instance($minutes)->diffInSeconds();
+            if ($fromNow < 0) {
+                throw new Exception("Cache TTL should be >=0");
+            }
+            return $fromNow;
         }
 
-        return is_string($duration) ? (int)$duration : $duration;
+        return $minutes * 60;
     }
 
     /**
-     * @param string $rawValue
+     * Get the cache key prefix.
      *
-     * @return mixed
+     * @return string
      */
-    protected function unwrapValue($rawValue)
+    public function getPrefix()
     {
-        if (null === $rawValue) {
-            return null;
-        }
-
-        $rawValue = unserialize($rawValue);
-
-        //is cache itself expired?
-        if ($rawValue[self::IDX_EXPIRES] < time()) {
-            return null;
-        }
-
-        $tagReader = new TagReader($this->redis, $rawValue[self::IDX_TAGS]);
-
-        if ($tagReader->anyTagExpired()) {
-            return null;
-        }
-
-        $value = $this->getCoderManager()->decode($rawValue[self::IDX_RAW_VALUE]);
-
-        return $value;
+        return $this->prefix;
     }
 
     /**
-     * @param $value
-     * @param $expires
+     * @param string $prefix
      *
-     * @return mixed
+     * @return string
      */
-    protected function wrapValue($value, $expires)
+    protected function makePrefix($prefix)
     {
-        $tagReader = new TagReader($this->redis, $this->tags);
+        if (strlen($prefix) === 0) {
+            return '';
+        }
 
-        $data = [
-            self::IDX_EXPIRES => $expires,
-            self::IDX_TAGS => $tagReader->getActualTagVersions(),
-            self::IDX_RAW_VALUE => $this->getCoderManager()->encode($value),
-        ];
-
-        return serialize($data);
+        return rtrim($prefix, ':') . ':';
     }
 
     /**
-     * @return CoderManager
+     * @param array $keys
+     *
+     * @return array
      */
-    private function getCoderManager()
+    protected function getPrefixedKeys(array $keys)
     {
+        $key = array_map(function ($value) {
+            return $this->prefix . $value;
+        }, $keys);
 
+        return $key;
     }
 
     /**
      * @param array $tags
      */
-    public function setTags($tags)
+    protected function setTags($tags)
     {
         $this->tags = $tags;
     }

@@ -1,6 +1,6 @@
 <?php
 
-namespace FHTeam\LaravelRedisCache\Coder;
+namespace FHTeam\LaravelRedisCache\DataLayer\Coder;
 
 class CoderManager
 {
