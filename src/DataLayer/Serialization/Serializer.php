@@ -1,10 +1,11 @@
 <?php
 
-namespace FHTeam\LaravelRedisCache\DataLayer;
+namespace FHTeam\LaravelRedisCache\DataLayer\Serialization;
 
-use FHTeam\LaravelRedisCache\DataLayer\Serialization\CoderManager;
-use FHTeam\LaravelRedisCache\Utility\TagVersionStorage;
-use FHTeam\LaravelRedisCache\Utility\Tools;
+use FHTeam\LaravelRedisCache\DataLayer\CacheItem;
+use FHTeam\LaravelRedisCache\TagVersionStorage\TagVersionStorageInterface;
+use FHTeam\LaravelRedisCache\Utility\Arr;
+use FHTeam\LaravelRedisCache\Utility\Time;
 
 /**
  * Class Wrapper
@@ -14,7 +15,7 @@ use FHTeam\LaravelRedisCache\Utility\Tools;
 class Serializer
 {
     /**
-     * @var TagVersionStorage
+     * @var TagVersionStorageInterface
      */
     private $tagVersionStorage;
     /**
@@ -23,10 +24,10 @@ class Serializer
     private $coder;
 
     /**
-     * @param TagVersionStorage $storage
-     * @param CoderManager      $coderManager
+     * @param TagVersionStorageInterface $storage
+     * @param CoderManager               $coderManager
      */
-    public function __construct(TagVersionStorage $storage, CoderManager $coderManager)
+    public function __construct(TagVersionStorageInterface $storage, CoderManager $coderManager)
     {
         $this->tagVersionStorage = $storage;
         $this->coder = $coderManager;
@@ -45,9 +46,9 @@ class Serializer
      */
     public function serialize($prefix, array $data, $minutes, $tags)
     {
-        $seconds = Tools::getTtlInSeconds($minutes);
+        $seconds = Time::getTtlInSeconds($minutes);
         $tags = $this->tagVersionStorage->getActualVersionsFor($tags);
-        $data = Tools::addPrefixToArrayKeys($prefix, $data);
+        $data = Arr::addPrefixToArrayKeys($prefix, $data);
 
         $data = array_map(function ($value) use ($seconds, $tags) {
             return CacheItem::encode($this->coder->encode($value), $seconds, $tags);
@@ -66,7 +67,7 @@ class Serializer
      */
     public function deserialize($prefix, array $data)
     {
-        $data = Tools::stripPrefixFromArrayKeys($prefix, $data);
+        $data = Arr::stripPrefixFromArrayKeys($prefix, $data);
 
         $data = array_map(function ($value) {
             return CacheItem::decode($value);

@@ -6,10 +6,10 @@ use App;
 use Closure;
 use DateTime;
 use FHTeam\LaravelRedisCache\DataLayer\Serialization\CoderManager;
-use FHTeam\LaravelRedisCache\DataLayer\Serializer;
+use FHTeam\LaravelRedisCache\DataLayer\Serialization\Serializer;
+use FHTeam\LaravelRedisCache\TagVersionStorage\TagVersionStorageInterface;
 use FHTeam\LaravelRedisCache\Utility\RedisConnectionTrait;
-use FHTeam\LaravelRedisCache\Utility\TagVersionStorage;
-use FHTeam\LaravelRedisCache\Utility\Tools;
+use FHTeam\LaravelRedisCache\Utility\Time;
 use Illuminate\Cache\TaggableStore;
 use Illuminate\Redis\Database as Redis;
 
@@ -35,7 +35,7 @@ class RedisStore extends TaggableStore
     protected $serializer;
 
     /**
-     * @var TagVersionStorage
+     * @var TagVersionStorageInterface
      */
     protected $tagVersionStorage;
 
@@ -57,7 +57,7 @@ class RedisStore extends TaggableStore
         $this->setRedisConnectionData($redis, $connection);
         $this->prefix = $this->makePrefix($prefix);
         $this->tags = $tags;
-        $this->tagVersionStorage = App::make(TagVersionStorage::class, [$connection]);
+        $this->tagVersionStorage = App::make(TagVersionStorageInterface::class, [$connection]);
         $this->serializer = new Serializer($this->tagVersionStorage, new CoderManager());
     }
 
@@ -230,7 +230,7 @@ class RedisStore extends TaggableStore
     public function forget($key)
     {
         $key = (array)$key;
-        $key = Tools::addPrefixToArrayValues($this->prefix, $key);
+        $key = Redis::addPrefixToArrayValues($this->prefix, $key);
         $this->connection()->del($key);
     }
 
@@ -271,7 +271,7 @@ class RedisStore extends TaggableStore
 
         if (0 !== $minutes) {
             $arguments['ex'] = 'EX'; // Arg #3
-            $arguments['seconds'] = Tools::getTtlInSeconds($minutes); // Arg #4
+            $arguments['seconds'] = Time::getTtlInSeconds($minutes); // Arg #4
         }
 
         if ($nxOnly) {
@@ -298,7 +298,7 @@ class RedisStore extends TaggableStore
      */
     public function mget(array $keys)
     {
-        $keys = Tools::addPrefixToArrayValues($this->prefix, $keys);
+        $keys = Redis::addPrefixToArrayValues($this->prefix, $keys);
         $data = $this->connection()->mget($keys);
         $data = $this->serializer->deserialize($this->prefix, $data);
 

@@ -2,38 +2,13 @@
 
 namespace FHTeam\LaravelRedisCache\Utility;
 
-use Carbon\Carbon;
-use DateTime;
-use Exception;
-
 /**
- * Class Tools
+ * Low-level array tools
  *
  * @package FHTeam\LaravelRedisCache\Utility
  */
-class Tools
+class Arr
 {
-    /**
-     * Calculate the number of minutes with the given duration.
-     *
-     * @param  \DateTime|int $minutes Either the exact date at which the item expire, or ttl in minutes
-     *
-     * @return int A number of seconds to use in Redis commands
-     * @throws Exception
-     */
-    public static function getTtlInSeconds($minutes)
-    {
-        if ($minutes instanceof DateTime) {
-            $fromNow = Carbon::instance($minutes)->diffInSeconds();
-            if ($fromNow < 0) {
-                throw new Exception("Cache TTL should be >=0");
-            }
-            return $fromNow;
-        }
-
-        return $minutes * 60;
-    }
-
     /**
      * @param string   $prefix
      * @param string[] $keys
@@ -49,6 +24,12 @@ class Tools
         return $key;
     }
 
+    /**
+     * @param string $prefix
+     * @param array  $array
+     *
+     * @return array
+     */
     public static function addPrefixToArrayKeys($prefix, array $array)
     {
         $result = [];
@@ -59,6 +40,12 @@ class Tools
         return $result;
     }
 
+    /**
+     * @param string $prefix
+     * @param array  $array
+     *
+     * @return array
+     */
     public static function stripPrefixFromArrayKeys($prefix, array $array)
     {
         $result = [];

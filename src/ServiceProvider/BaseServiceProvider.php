@@ -2,7 +2,8 @@
 
 namespace FHTeam\LaravelRedisCache\ServiceProvider;
 
-use FHTeam\LaravelRedisCache\Utility\TagVersionStorage;
+use FHTeam\LaravelRedisCache\TagVersionStorage\PlainTagVersionStorage;
+use FHTeam\LaravelRedisCache\TagVersionStorage\TagVersionStorageInterface;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Cache\Repository;
 use Illuminate\Redis\Database;
@@ -36,13 +37,14 @@ abstract class BaseServiceProvider extends ServiceProvider
             });
 
             // Registering TagVersionStorage to share actual tag versions
-            $this->app->bind(TagVersionStorage::class, function ($connection) use ($redis) {
+            $this->app->bind(TagVersionStorageInterface::class, function ($connection) use ($redis) {
                 static $cache = [];
                 if (isset($cache[$connection])) {
                     return $cache[$connection];
                 }
 
-                return $cache[$connection] = new TagVersionStorage($redis, $connection);
+                // TODO: replace with App::make from config file
+                return $cache[$connection] = new PlainTagVersionStorage($redis, $connection);
             });
         });
     }

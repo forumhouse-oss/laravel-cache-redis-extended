@@ -1,7 +1,8 @@
 <?php
 
-namespace FHTeam\LaravelRedisCache\Utility;
+namespace FHTeam\LaravelRedisCache\TagVersionStorage;
 
+use FHTeam\LaravelRedisCache\Utility\RedisConnectionTrait;
 use Illuminate\Redis\Database;
 
 /**
@@ -9,7 +10,7 @@ use Illuminate\Redis\Database;
  *
  * @package FHTeam\LaravelRedisCache\Tag
  */
-class TagVersionStorage
+class PlainTagVersionStorage implements TagVersionStorageInterface
 {
     use RedisConnectionTrait;
 
