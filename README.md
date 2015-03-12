@@ -31,7 +31,8 @@ Core <===> Serialization <===> Encoding
  (encoded item value, expiration data, item tags with their versions). Serialization relies on Coders to convert objects into 
  something easily serializable.
  - **Coders** contain low-level serialization routes. They receive data (objects or whatever) and emit something, that
- can be passed to PHP's `serialize()` in order to get encoded object's representation
+ can be passed to PHP's `serialize()` in order to get encoded object's representation. Every coder must implement 
+ `CoderInterface`
  - **TagVersionStorage** is a per-Redis-connection singleton, that manages tag versions: fetches actual tag versions, 
  compares them, flushes them etc. All tag storage handlers should implement `TagVersionStorageInterface`. 
    - `PlainTagVersionStorage` is a basic version of tag version storage that doesn't share any information about tag 
