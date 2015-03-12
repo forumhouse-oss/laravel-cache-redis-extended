@@ -2,11 +2,14 @@
 
 namespace FHTeam\LaravelRedisCache\Core;
 
-use Carbon\Carbon;
+use App;
 use Closure;
 use DateTime;
-use Exception;
-use FHTeam\LaravelRedisCache\DataLayer\Wrapper;
+use FHTeam\LaravelRedisCache\DataLayer\Serialization\CoderManager;
+use FHTeam\LaravelRedisCache\DataLayer\Serializer;
+use FHTeam\LaravelRedisCache\Utility\RedisConnectionTrait;
+use FHTeam\LaravelRedisCache\Utility\TagVersionStorage;
+use FHTeam\LaravelRedisCache\Utility\Tools;
 use Illuminate\Cache\TaggableStore;
 use Illuminate\Redis\Database as Redis;
 
@@ -17,12 +20,7 @@ use Illuminate\Redis\Database as Redis;
  */
 class RedisStore extends TaggableStore
 {
-    /**
-     * The Redis database connection.
-     *
-     * @var \Illuminate\Redis\Database
-     */
-    protected $redis;
+    use RedisConnectionTrait;
 
     /**
      * A string that should be prepended to keys.
@@ -32,21 +30,14 @@ class RedisStore extends TaggableStore
     protected $prefix;
 
     /**
-     * The Redis connection that should be used.
-     *
-     * @var string
+     * @var Serializer
      */
-    protected $connection;
+    protected $serializer;
 
     /**
-     * @var Wrapper
+     * @var TagVersionStorage
      */
-    protected $wrapper;
-
-    /**
-     * @var TagManager
-     */
-    protected $tagManager;
+    protected $tagVersionStorage;
 
     /**
      * @var string[] Tag names, that are attached to this store instance
@@ -59,14 +50,15 @@ class RedisStore extends TaggableStore
      * @param  \Illuminate\Redis\Database $redis
      * @param  string                     $prefix
      * @param  string                     $connection
+     * @param array                       $tags
      */
-    public function __construct(Redis $redis, $prefix = '', $connection = 'default')
+    public function __construct(Redis $redis, $prefix = '', $connection = 'default', $tags = [])
     {
-        $this->redis = $redis;
-        $this->connection = $connection;
+        $this->setRedisConnectionData($redis, $connection);
         $this->prefix = $this->makePrefix($prefix);
-        $this->tagManager = new TagManager($redis);
-        $this->wrapper = new Wrapper($redis, $this->tagManager, $this->prefix);
+        $this->tags = $tags;
+        $this->tagVersionStorage = App::make(TagVersionStorage::class, [$connection]);
+        $this->serializer = new Serializer($this->tagVersionStorage, new CoderManager());
     }
 
     /**
@@ -238,7 +230,7 @@ class RedisStore extends TaggableStore
     public function forget($key)
     {
         $key = (array)$key;
-        $key = $this->getPrefixedKeys($key);
+        $key = Tools::addPrefixToArrayValues($this->prefix, $key);
         $this->connection()->del($key);
     }
 
@@ -250,11 +242,69 @@ class RedisStore extends TaggableStore
     public function flush()
     {
         if (!empty($this->tags)) {
-            $this->tagManager->flushTags($this->tags);
+            $this->tagVersionStorage->flushTags($this->tags);
         } else {
             $this->connection()->flushdb();
         }
     }
+
+    /**
+     * @param array $values
+     * @param int   $minutes
+     * @param bool  $nxOnly Only set non-existent keys
+     *
+     * @throws \Predis\Response\ServerException
+     * @throws \Predis\Transaction\AbortedMultiExecException
+     */
+    public function mset(array $values, $minutes, $nxOnly = false)
+    {
+        $values = $this->serializer->serialize($this->prefix, $values, $minutes, $this->tags);
+
+        // Executing MULTI only if we transfer more than one item
+        $redis = ((count($values) > 1) ? $this->connection()->transaction() : $this->connection());
+
+        //Building MSET command with arguments we need
+        $arguments = [
+            'key' => '', // Arg #1
+            'value' => '', // Arg #2
+        ];
+
+        if (0 !== $minutes) {
+            $arguments['ex'] = 'EX'; // Arg #3
+            $arguments['seconds'] = Tools::getTtlInSeconds($minutes); // Arg #4
+        }
+
+        if ($nxOnly) {
+            $arguments['nx'] = 'NX'; // Arg #5
+        }
+
+        foreach ($values as $key => $value) {
+            $arguments['key'] = $key;
+            $arguments['value'] = $value;
+
+            call_user_func_array([$redis, 'set'], $arguments);
+        }
+
+        // Executing Redis EXEC if needed
+        if (count($values) > 1) {
+            $redis->execute();
+        }
+    }
+
+    /**
+     * @param array $keys
+     *
+     * @return array|void
+     */
+    public function mget(array $keys)
+    {
+        $keys = Tools::addPrefixToArrayValues($this->prefix, $keys);
+        $data = $this->connection()->mget($keys);
+        $data = $this->serializer->deserialize($this->prefix, $data);
+
+        return $data;
+    }
+
 
     /**
      * Begin executing a new tags operation.
@@ -265,18 +315,8 @@ class RedisStore extends TaggableStore
      */
     public function tags($names)
     {
-        $self = new static($this->redis, $this->prefix, $this->connection);
-        return $self->setTags(is_array($names) ? $names : func_get_args());
-    }
-
-    /**
-     * Get the Redis connection instance.
-     *
-     * @return \Predis\Client
-     */
-    public function connection()
-    {
-        return $this->redis->connection($this->connection);
+        $tags = is_array($names) ? $names : func_get_args();
+        return new static($this->redis, $this->prefix, $this->connection, $tags);
     }
 
     /**
@@ -302,88 +342,6 @@ class RedisStore extends TaggableStore
     }
 
     /**
-     * @param array $keys
-     *
-     * @return array
-     */
-    public function mget(array $keys)
-    {
-        $keys = array_map(function ($value) {
-            return $this->prefix . $value;
-        }, $keys);
-
-        $data = $this->connection()->mget($keys);
-
-        return $this->wrapper->unwrapData($data);
-    }
-
-    /**
-     * @param array $values
-     * @param int   $minutes
-     * @param bool  $nxOnly Only set non-existent keys
-     *
-     * @throws Exception
-     * @throws \Predis\Response\ServerException
-     * @throws \Predis\Transaction\AbortedMultiExecException
-     */
-    public function mset(array $values, $minutes, $nxOnly = false)
-    {
-        $seconds = $this->getTtlInSeconds($minutes);
-        $result = $this->wrapper->wrapData($values, $seconds, $this->tags);
-
-        // Executing MULTI only if we transfer more than one item
-        $redis = ((count($values) > 1) ? $this->connection()->transaction() : $this->connection());
-
-        //Building MSET command with arguments we need
-        $arguments = [
-            'key' => '', // Arg #1
-            'value' => '', // Arg #2
-        ];
-
-        if (0 !== $minutes) {
-            $arguments['ex'] = 'EX'; // Arg #3
-            $arguments['seconds'] = $seconds; // Arg #4
-        }
-
-        if ($nxOnly) {
-            $arguments['nx'] = 'NX'; // Arg #5
-        }
-
-        foreach ($result as $key => $value) {
-            $arguments['key'] = $key;
-            $arguments['value'] = $value;
-
-            call_user_func_array([$redis, 'set'], $arguments);
-        }
-
-        // Executing Redis EXEC if needed
-        if (count($values) > 1) {
-            $redis->execute();
-        }
-    }
-
-    /**
-     * Calculate the number of minutes with the given duration.
-     *
-     * @param  \DateTime|int $minutes Either the exact date at which the item expire, or ttl in minutes
-     *
-     * @return int A number of seconds to use in Redis commands
-     * @throws Exception
-     */
-    protected function getTtlInSeconds($minutes)
-    {
-        if ($minutes instanceof DateTime) {
-            $fromNow = Carbon::instance($minutes)->diffInSeconds();
-            if ($fromNow < 0) {
-                throw new Exception("Cache TTL should be >=0");
-            }
-            return $fromNow;
-        }
-
-        return $minutes * 60;
-    }
-
-    /**
      * Get the cache key prefix.
      *
      * @return string
@@ -405,27 +363,5 @@ class RedisStore extends TaggableStore
         }
 
         return rtrim($prefix, ':') . ':';
-    }
-
-    /**
-     * @param array $keys
-     *
-     * @return array
-     */
-    protected function getPrefixedKeys(array $keys)
-    {
-        $key = array_map(function ($value) {
-            return $this->prefix . $value;
-        }, $keys);
-
-        return $key;
-    }
-
-    /**
-     * @param array $tags
-     */
-    protected function setTags($tags)
-    {
-        $this->tags = $tags;
     }
 }

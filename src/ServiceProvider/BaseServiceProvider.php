@@ -2,6 +2,7 @@
 
 namespace FHTeam\LaravelRedisCache\ServiceProvider;
 
+use FHTeam\LaravelRedisCache\Utility\TagVersionStorage;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Cache\Repository;
 use Illuminate\Redis\Database;
@@ -22,13 +23,26 @@ abstract class BaseServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->booted(function ($app) {
+            /** @var Database $redis */
             /** @var CacheManager $cacheManager */
             /** @var \Illuminate\Contracts\Foundation\Application $app */
             $cacheManager = $app['cache'];
-            $cacheManager->extend('amqp', function ($app, array $config) use ($cacheManager) {
-                $redis = $app['redis'];
+            $redis = $app['redis'];
+
+            // Registering cache driver
+            $cacheManager->extend('amqp', function ($app, array $config) use ($cacheManager, $redis) {
                 $connection = array_get($config, 'connection', 'default') ?: 'default';
                 return $this->getRepository($cacheManager, $redis, $this->getPrefix($config), $connection);
+            });
+
+            // Registering TagVersionStorage to share actual tag versions
+            $this->app->bind(TagVersionStorage::class, function ($connection) use ($redis) {
+                static $cache = [];
+                if (isset($cache[$connection])) {
+                    return $cache[$connection];
+                }
+
+                return $cache[$connection] = new TagVersionStorage($redis, $connection);
             });
         });
     }
