@@ -4,6 +4,7 @@ namespace FHTeam\LaravelRedisCache\Core;
 
 use App;
 use Closure;
+use Config;
 use DateTime;
 use FHTeam\LaravelRedisCache\DataLayer\Serialization\CoderManager;
 use FHTeam\LaravelRedisCache\DataLayer\Serialization\Serializer;
@@ -58,7 +59,8 @@ class RedisStore extends TaggableStore
         $this->prefix = $this->makePrefix($prefix);
         $this->tags = $tags;
         $this->tagVersionStorage = App::make(TagVersionStorageInterface::class, [$connection]);
-        $this->serializer = new Serializer($this->tagVersionStorage, new CoderManager());
+        $coderConfig = Config::get("database.redis.{$this->connection}.coders");
+        $this->serializer = new Serializer($this->tagVersionStorage, new CoderManager($coderConfig));
     }
 
     /**
