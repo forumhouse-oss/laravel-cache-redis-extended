@@ -26,18 +26,18 @@ Core <===> Serialization <===> Encoding
           + Utility +
 ```
 
- - *Core* contains mostly Redis command implementations
- - *Serialization* handles packing and unpacking cache items into a structure, suitable to be placed into a cache
+ - **Core** contains mostly Redis command implementations
+ - **Serialization** handles packing and unpacking cache items into a structure, suitable to be placed into a cache
  (encoded item value, expiration data, item tags with their versions). Serialization relies on Coders to convert objects into 
  something easily serializable.
- - *Coders* contain low-level serialization routes. They receive data (objects or whatever) and emit something, that
+ - **Coders** contain low-level serialization routes. They receive data (objects or whatever) and emit something, that
  can be passed to PHP's `serialize()` in order to get encoded object's representation
- - *TagVersionStorage* is a per-Redis-connection singleton, that manages tag versions: fetches actual tag versions, 
+ - **TagVersionStorage** is a per-Redis-connection singleton, that manages tag versions: fetches actual tag versions, 
  compares them, flushes them etc. All tag storage handlers should implement `TagVersionStorageInterface`. 
    - `PlainTagVersionStorage` is a basic version of tag version storage that doesn't share any information about tag 
    versions outside current PHP process. You can implement a version, that will store actual tag versions,
     for example, in APC if querying Redis becomes expensive or just needs to be avoided.
- - *Utility* contains some low-level specific tools which are not subsystem related.
+ - **Utility** contains some low-level specific tools which are not subsystem related.
    - `RedisConnectionTrait` - is a trait, that allows to reuse the same scheme of Redis connection handling across the
    project
    - `Arr` contains some low-level array routines
