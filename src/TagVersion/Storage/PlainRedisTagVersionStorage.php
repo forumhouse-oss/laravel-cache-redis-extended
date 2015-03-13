@@ -33,7 +33,7 @@ class PlainRedisTagVersionStorage implements TagVersionStorageInterface
         $this->setRedisConnectionData($redis, $connection, $prefix . ($prefix ? ':' : '') . 'tags');
     }
 
-    public function precacheTagVersions(array $tagNames)
+    public function cacheTagVersions(array $tagNames)
     {
         $needToRequest = array_diff($tagNames, array_keys($this->actualTagVersions));
         $newTagVersions = $this->connection()->mget($needToRequest);

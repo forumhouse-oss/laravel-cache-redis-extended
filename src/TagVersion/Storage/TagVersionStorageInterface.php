@@ -11,7 +11,7 @@ interface TagVersionStorageInterface
      *
      * @param array $tagNames
      */
-    public function precacheTagVersions(array $tagNames);
+    public function cacheTagVersions(array $tagNames);
 
     /**
      * Updates tag versions to current

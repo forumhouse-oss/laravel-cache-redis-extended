@@ -2,11 +2,9 @@
 
 namespace FHTeam\LaravelRedisCache\ServiceProvider;
 
-use FHTeam\LaravelRedisCache\TagVersion\Storage\PlainRedisTagVersionStorage;
-use FHTeam\LaravelRedisCache\TagVersion\TagVersionManager;
-use FHTeam\LaravelRedisCache\TagVersion\TagVersionManagerInterface;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Cache\Repository;
+use Illuminate\Foundation\Application;
 use Illuminate\Redis\Database;
 use Illuminate\Support\ServiceProvider;
 
@@ -25,35 +23,17 @@ abstract class BaseServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->booted(function ($app) {
-            /** @var Database $redis */
             /** @var CacheManager $cacheManager */
-            /** @var \Illuminate\Contracts\Foundation\Application $app */
             $cacheManager = $app['cache'];
-            $redis = $app['redis'];
 
             // Registering cache driver
-            $cacheManager->extend('fh-redis', function ($app, array $config) use ($cacheManager, $redis) {
+            $cacheManager->extend('fh-redis', function ($app, array $config) use ($cacheManager) {
 
+                /** @var Application $app */
+                /** @var Database $redis */
+                $redis = $app['redis'];
                 $connection = array_get($config, 'connection', 'default') ?: 'default';
                 $prefix = $this->getPrefix($config);
-
-                // Registering TagVersionStorage to share actual tag versions
-                $this->app->bind(
-                    TagVersionManagerInterface::class,
-
-                    function ($connection) use ($redis, $config, $prefix) {
-                        static $cache = [];
-                        if (isset($cache[$connection])) {
-                            return $cache[$connection];
-                        }
-
-                        // TODO: replace with App::make from config file
-                        return $cache[$connection] = new TagVersionManager(
-                            new PlainRedisTagVersionStorage($redis, $connection, $prefix)
-                        );
-                    }
-                );
-
                 return $this->getRepository($cacheManager, $redis, $prefix, $connection);
             });
         });

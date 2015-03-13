@@ -24,7 +24,7 @@ class TagVersionManager implements TagVersionManagerInterface
             return [];
         }
 
-        $this->storage->precacheTagVersions($tagNames);
+        $this->storage->cacheTagVersions($tagNames);
 
         $result = [];
         foreach ($tagNames as $tagName) {
@@ -35,7 +35,7 @@ class TagVersionManager implements TagVersionManagerInterface
 
     public function isAnyTagExpired(array $tags)
     {
-        $this->storage->precacheTagVersions(array_keys($tags));
+        $this->storage->cacheTagVersions(array_keys($tags));
         foreach ($tags as $tagName => $tagVersion) {
             if ($tagVersion < $this->storage->getTagVersion($tagName)) {
                 return true;

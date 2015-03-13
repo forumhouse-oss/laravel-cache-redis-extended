@@ -8,42 +8,31 @@ use FHTeam\LaravelRedisCache\Utility\ArrayTools;
 use FHTeam\LaravelRedisCache\Utility\Time;
 
 /**
- * Class Wrapper
+ * Generic serializer implementation
  *
- * @package FHTeam\LaravelRedisCache\DataLayer
+ * @package FHTeam\LaravelRedisCache\DataLayer\Serialization
  */
-class Serializer
+class GenericSerializer implements SerializerInterface
 {
     /**
      * @var TagVersionManagerInterface
      */
     private $tagVersions;
     /**
-     * @var CoderManager
+     * @var CoderManagerInterface
      */
     private $coder;
 
     /**
      * @param TagVersionManagerInterface $tagVersionManager
-     * @param CoderManager               $coderManager
+     * @param CoderManagerInterface      $coderManager
      */
-    public function __construct(TagVersionManagerInterface $tagVersionManager, CoderManager $coderManager)
+    public function __construct(TagVersionManagerInterface $tagVersionManager, CoderManagerInterface $coderManager)
     {
         $this->tagVersions = $tagVersionManager;
         $this->coder = $coderManager;
     }
 
-    /**
-     * Prepares data to be sent to the cache using any command
-     *
-     * @param       $prefix
-     * @param array $data
-     * @param int   $minutes
-     * @param       $tags
-     *
-     * @return array
-     * @throws \Exception
-     */
     public function serialize($prefix, array $data, $minutes, $tags)
     {
         $seconds = Time::getTtlInSeconds($minutes);
@@ -58,13 +47,6 @@ class Serializer
         return $data;
     }
 
-    /**
-     * @param string $prefix
-     * @param array  $data
-     *
-     * @return array
-     * @throws \Exception
-     */
     public function deserialize($prefix, array $data)
     {
         $data = ArrayTools::stripPrefixFromArrayKeys($prefix, $data);

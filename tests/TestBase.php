@@ -2,7 +2,20 @@
 
 namespace FHTeam\LaravelRedisCache\Tests;
 
+use FHTeam\LaravelRedisCache\DataLayer\Serialization\Coder\EloquentCoder;
+use FHTeam\LaravelRedisCache\DataLayer\Serialization\CoderManagerInterface;
+use FHTeam\LaravelRedisCache\DataLayer\Serialization\GenericCoderManager;
+use FHTeam\LaravelRedisCache\DataLayer\Serialization\GenericSerializer;
+use FHTeam\LaravelRedisCache\DataLayer\Serialization\SerializerInterface;
 use FHTeam\LaravelRedisCache\ServiceProvider\Laravel4ServiceProvider;
+use FHTeam\LaravelRedisCache\ServiceProvider\Laravel5ServiceProvider;
+use FHTeam\LaravelRedisCache\TagVersion\Storage\PlainRedisTagVersionStorage;
+use FHTeam\LaravelRedisCache\TagVersion\Storage\TagVersionStorageInterface;
+use FHTeam\LaravelRedisCache\TagVersion\TagVersionManager;
+use FHTeam\LaravelRedisCache\TagVersion\TagVersionManagerInterface;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Application;
 use Orchestra\Testbench\TestCase;
 
 /**
@@ -23,8 +36,29 @@ class TestBase extends TestCase
     {
         /** @var \Illuminate\Config\Repository $config */
         $config = $app['config'];
+
         // reset base path to point to our package's src directory
-        $config->set('database.redis.test_connection', [
+        $config->set('cache.driver', 'fh-redis');
+
+        $app->bind(TagVersionManagerInterface::class, TagVersionManager::class);
+        $app->bind(TagVersionStorageInterface::class, function () use ($app) {
+            return new PlainRedisTagVersionStorage($app['redis'], 'test_connection', 'tag_test');
+        });
+
+        $app->bind(SerializerInterface::class, GenericSerializer::class);
+        $app->bind(CoderManagerInterface::class, GenericCoderManager::class);
+
+        $config->set('database.redis', [
+            'cluster' => false,
+            'test_connection' => [
+                'host' => 'localhost',
+                'port' => 6379,
+                'database' => 0,
+                'coders' => [
+                    Model::class => EloquentCoder::class,
+                    Collection::class => EloquentCoder::class
+                ],
+            ]
         ]);
     }
 
@@ -38,8 +72,10 @@ class TestBase extends TestCase
      */
     protected function getPackageProviders()
     {
-        return [
-            Laravel4ServiceProvider::class,
-        ];
+        if (version_compare("5.0", Application::VERSION)) {
+            return [Laravel4ServiceProvider::class,];
+        } else {
+            return [Laravel5ServiceProvider::class,];
+        }
     }
 }

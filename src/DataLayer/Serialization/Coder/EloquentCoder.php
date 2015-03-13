@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class responsible for encoding / decoding Eloquent models
+ * Class responsible for encoding / decoding Eloquent models and collections
  *
  * @package FHTeam\LaravelRedisCache\DataLayer\Serialization\Coder
  */
-class EloquentModelCoder implements CoderInterface
+class EloquentCoder implements CoderInterface
 {
 
     const TYPE_MODEL = 'model';

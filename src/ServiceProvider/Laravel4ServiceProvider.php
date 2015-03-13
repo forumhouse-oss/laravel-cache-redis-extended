@@ -2,7 +2,6 @@
 
 namespace FHTeam\LaravelRedisCache\ServiceProvider;
 
-
 use Illuminate\Cache\CacheManager;
 use Illuminate\Cache\Repository;
 use Illuminate\Redis\Database;
