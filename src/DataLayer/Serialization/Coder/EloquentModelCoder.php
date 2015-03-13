@@ -3,8 +3,8 @@
 namespace FHTeam\LaravelRedisCache\DataLayer\Serialization\Coder;
 
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
 
 /**
  * Class responsible for encoding / decoding Eloquent models
@@ -15,15 +15,26 @@ class EloquentModelCoder implements CoderInterface
 {
 
     const TYPE_MODEL = 'model';
+
     const TYPE_COLLECTION = 'collection';
+
+    const FIELD_TYPE = 'type';
+
+    const FIELD_MODEL_CLASS = 'class';
+
+    const FIELD_MODEL_ATTRIBUTES = 'attributes';
+
+    const FIELD_COLLECTION_ITEMS = 'items';
+
+    const FIELD_MODEL_RELATIONS = 'relations';
 
     public function decode($value)
     {
-        if (!isset($value['type'])) {
+        if (!isset($value[self::FIELD_TYPE])) {
             throw new Exception("Attempt to deserialize damaged object (no 'type' data): " . json_encode($value));
         }
 
-        switch ($value['type']) {
+        switch ($value[self::FIELD_TYPE]) {
             case self::TYPE_MODEL:
                 return $this->decodeModel($value);
                 break;
@@ -31,7 +42,7 @@ class EloquentModelCoder implements CoderInterface
                 return $this->decodeCollection($value);
                 break;
             default:
-                throw new Exception("Unable to deserialize type '{$value['type']}'");
+                throw new Exception("Unable to deserialize type '{$value[self::FIELD_TYPE]}'");
         }
     }
 
@@ -49,6 +60,8 @@ class EloquentModelCoder implements CoderInterface
     }
 
     /**
+     * Encodes Eloquent model into array of data
+     *
      * @param Model $model
      *
      * @return array
@@ -57,29 +70,21 @@ class EloquentModelCoder implements CoderInterface
     protected function encodeModel(Model $model)
     {
         $result = [
-            'type' => self::TYPE_MODEL,
-            'class' => get_class($model),
-            'attributes' => $model->getAttributes(),
+            self::FIELD_TYPE => self::TYPE_MODEL,
+            self::FIELD_MODEL_CLASS => get_class($model),
+            self::FIELD_MODEL_ATTRIBUTES => $model->getAttributes(),
         ];
 
         foreach ($model->getRelations() as $relationName => $relationData) {
-            if ($relationData instanceof Collection) {
-                $result['relations'][$relationName] = $this->encodeCollection($relationData);
-                continue;
-            }
-
-            if ($relationData instanceof Model) {
-                $result['relations'][$relationName] = $this->encode($relationData);
-                continue;
-            }
-
-            throw new Exception("Unable to serialize data of class " . get_class($relationData));
+            $result[self::FIELD_MODEL_RELATIONS][$relationName] = $this->encode($relationData);
         }
 
         return $result;
     }
 
     /**
+     * Encodes Eloquent collection into array of data
+     *
      * @param Collection $collection
      *
      * @return array
@@ -88,31 +93,57 @@ class EloquentModelCoder implements CoderInterface
     protected function encodeCollection(Collection $collection)
     {
         $result = [
-            'type' => self::TYPE_COLLECTION,
-            'items' => [],
+            self::FIELD_TYPE => self::TYPE_COLLECTION,
+            self::FIELD_COLLECTION_ITEMS => [],
         ];
         foreach ($collection as $item) {
-            $result['items'][] = $this->encodeModel($item);
+            $result[self::FIELD_COLLECTION_ITEMS][] = $this->encode($item);
         }
 
         return $result;
     }
 
-    protected function decodeModel($value)
+    /**
+     * Decodes Eloquent model from array of data
+     *
+     * @param $value
+     *
+     * @return Model
+     * @throws Exception
+     */
+    protected function decodeModel(array $value)
     {
+        $modelClass = $value[self::FIELD_MODEL_CLASS];
+        /** @var Model $model */
+        $model = new $modelClass;
+        $model->setRawAttributes($value[self::FIELD_MODEL_ATTRIBUTES], true);
+        $model->exists = true;
+
+        foreach ($value[self::FIELD_MODEL_RELATIONS] as $relationName => $relationValue) {
+            $model->setRelation($relationName, $this->decode($relationValue));
+        }
+        return $model;
     }
 
+    /**
+     * Decodes Eloquent collection from array of data
+     *
+     * @param array $value
+     *
+     * @return Collection
+     * @throws Exception
+     */
     protected function decodeCollection(array $value)
     {
-        if (!isset($value['items'])) {
+        if (!isset($value[self::FIELD_COLLECTION_ITEMS])) {
             throw new Exception("Attempt to deserialize damaged collection (no 'items' data): " . json_encode($value));
         }
 
         $result = [];
-        foreach ($value['items'] as $item) {
-            $result[] = $this->decodeModel($item);
+        foreach ($value[self::FIELD_COLLECTION_ITEMS] as $item) {
+            $result[] = $this->decode($item);
         }
 
-        return new \Illuminate\Database\Eloquent\Collection($result);
+        return new Collection($result);
     }
 }
