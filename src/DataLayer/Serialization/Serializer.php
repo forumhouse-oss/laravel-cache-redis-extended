@@ -17,19 +17,19 @@ class Serializer
     /**
      * @var TagVersionManagerInterface
      */
-    private $tagVersionStorage;
+    private $tagVersions;
     /**
      * @var CoderManager
      */
     private $coder;
 
     /**
-     * @param TagVersionManagerInterface $storage
+     * @param TagVersionManagerInterface $tagVersionManager
      * @param CoderManager               $coderManager
      */
-    public function __construct(TagVersionManagerInterface $storage, CoderManager $coderManager)
+    public function __construct(TagVersionManagerInterface $tagVersionManager, CoderManager $coderManager)
     {
-        $this->tagVersionStorage = $storage;
+        $this->tagVersions = $tagVersionManager;
         $this->coder = $coderManager;
     }
 
@@ -47,11 +47,11 @@ class Serializer
     public function serialize($prefix, array $data, $minutes, $tags)
     {
         $seconds = Time::getTtlInSeconds($minutes);
-        $tags = $this->tagVersionStorage->getActualVersionsFor($tags);
+        $tags = $this->tagVersions->getActualVersionsFor($tags);
         $data = ArrayTools::addPrefixToArrayKeys($prefix, $data);
 
         $data = array_map(function ($value) use ($seconds, $tags) {
-            return CacheItem::encode($this->coder->encode($value), $seconds, $tags);
+            return CacheItem::encode(is_string($value) ? $value : $this->coder->encode($value), $seconds, $tags);
         }, $data);
 
 
@@ -70,7 +70,7 @@ class Serializer
         $data = ArrayTools::stripPrefixFromArrayKeys($prefix, $data);
 
         $data = array_map(function ($value) {
-            return CacheItem::decode($value);
+            return is_string($value) ? $value : CacheItem::decode($value);
         }, $data);
 
         /** @var CacheItem[] $data */
@@ -80,7 +80,7 @@ class Serializer
                 continue;
             }
 
-            if ($this->tagVersionStorage->isAnyTagExpired($item->getTags())) {
+            if ($this->tagVersions->isAnyTagExpired($item->getTags())) {
                 $item = null;
                 continue;
             }

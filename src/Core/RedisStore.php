@@ -32,7 +32,7 @@ class RedisStore extends TaggableStore
     /**
      * @var TagVersionManagerInterface
      */
-    protected $tagVersionManager;
+    protected $tagVersions;
 
     /**
      * @var string[] Tag names, that are attached to this store instance
@@ -51,10 +51,10 @@ class RedisStore extends TaggableStore
     {
         $this->setRedisConnectionData($redis, $connection, $prefix);
         $this->tags = $tags;
-        $this->tagVersionManager = App::make(TagVersionManagerInterface::class, [$connection]);
+        $this->tagVersions = App::make(TagVersionManagerInterface::class, [$connection]);
 
         $coderConfig = Config::get("database.redis.{$this->connection}.coders");
-        $this->serializer = new Serializer($this->tagVersionManager, new CoderManager($coderConfig));
+        $this->serializer = new Serializer($this->tagVersions, new CoderManager($coderConfig));
     }
 
     /**
@@ -238,7 +238,7 @@ class RedisStore extends TaggableStore
     public function flush()
     {
         if (!empty($this->tags)) {
-            $this->tagVersionManager->flushTags($this->tags);
+            $this->tagVersions->flushTags($this->tags);
         } else {
             $this->connection()->flushdb();
         }
