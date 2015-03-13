@@ -8,7 +8,8 @@ use Config;
 use DateTime;
 use FHTeam\LaravelRedisCache\DataLayer\Serialization\CoderManager;
 use FHTeam\LaravelRedisCache\DataLayer\Serialization\Serializer;
-use FHTeam\LaravelRedisCache\TagVersionStorage\TagVersionStorageInterface;
+use FHTeam\LaravelRedisCache\TagVersion\TagVersionManagerInterface;
+use FHTeam\LaravelRedisCache\Utility\ArrayTools;
 use FHTeam\LaravelRedisCache\Utility\RedisConnectionTrait;
 use FHTeam\LaravelRedisCache\Utility\Time;
 use Illuminate\Cache\TaggableStore;
@@ -24,21 +25,14 @@ class RedisStore extends TaggableStore
     use RedisConnectionTrait;
 
     /**
-     * A string that should be prepended to keys.
-     *
-     * @var string
-     */
-    protected $prefix;
-
-    /**
      * @var Serializer
      */
     protected $serializer;
 
     /**
-     * @var TagVersionStorageInterface
+     * @var TagVersionManagerInterface
      */
-    protected $tagVersionStorage;
+    protected $tagVersionManager;
 
     /**
      * @var string[] Tag names, that are attached to this store instance
@@ -55,12 +49,12 @@ class RedisStore extends TaggableStore
      */
     public function __construct(Redis $redis, $prefix = '', $connection = 'default', $tags = [])
     {
-        $this->setRedisConnectionData($redis, $connection);
-        $this->prefix = $this->makePrefix($prefix);
+        $this->setRedisConnectionData($redis, $connection, $prefix);
         $this->tags = $tags;
-        $this->tagVersionStorage = App::make(TagVersionStorageInterface::class, [$connection]);
+        $this->tagVersionManager = App::make(TagVersionManagerInterface::class, [$connection]);
+
         $coderConfig = Config::get("database.redis.{$this->connection}.coders");
-        $this->serializer = new Serializer($this->tagVersionStorage, new CoderManager($coderConfig));
+        $this->serializer = new Serializer($this->tagVersionManager, new CoderManager($coderConfig));
     }
 
     /**
@@ -232,7 +226,7 @@ class RedisStore extends TaggableStore
     public function forget($key)
     {
         $key = (array)$key;
-        $key = Redis::addPrefixToArrayValues($this->prefix, $key);
+        $key = ArrayTools::addPrefixToArrayValues($this->prefix, $key);
         $this->connection()->del($key);
     }
 
@@ -244,7 +238,7 @@ class RedisStore extends TaggableStore
     public function flush()
     {
         if (!empty($this->tags)) {
-            $this->tagVersionStorage->flushTags($this->tags);
+            $this->tagVersionManager->flushTags($this->tags);
         } else {
             $this->connection()->flushdb();
         }
@@ -300,7 +294,7 @@ class RedisStore extends TaggableStore
      */
     public function mget(array $keys)
     {
-        $keys = Redis::addPrefixToArrayValues($this->prefix, $keys);
+        $keys = ArrayTools::addPrefixToArrayValues($this->prefix, $keys);
         $data = $this->connection()->mget($keys);
         $data = $this->serializer->deserialize($this->prefix, $data);
 
@@ -319,51 +313,5 @@ class RedisStore extends TaggableStore
     {
         $tags = is_array($names) ? $names : func_get_args();
         return new static($this->redis, $this->prefix, $this->connection, $tags);
-    }
-
-    /**
-     * Set the connection name to be used.
-     *
-     * @param  string $connection
-     *
-     * @return void
-     */
-    public function setConnection($connection)
-    {
-        $this->connection = $connection;
-    }
-
-    /**
-     * Get the Redis database instance.
-     *
-     * @return \Illuminate\Redis\Database
-     */
-    public function getRedis()
-    {
-        return $this->redis;
-    }
-
-    /**
-     * Get the cache key prefix.
-     *
-     * @return string
-     */
-    public function getPrefix()
-    {
-        return $this->prefix;
-    }
-
-    /**
-     * @param string $prefix
-     *
-     * @return string
-     */
-    protected function makePrefix($prefix)
-    {
-        if (strlen($prefix) === 0) {
-            return '';
-        }
-
-        return rtrim($prefix, ':') . ':';
     }
 }

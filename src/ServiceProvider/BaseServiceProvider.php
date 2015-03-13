@@ -2,8 +2,9 @@
 
 namespace FHTeam\LaravelRedisCache\ServiceProvider;
 
-use FHTeam\LaravelRedisCache\TagVersionStorage\PlainTagVersionStorage;
-use FHTeam\LaravelRedisCache\TagVersionStorage\TagVersionStorageInterface;
+use FHTeam\LaravelRedisCache\TagVersion\Storage\PlainRedisTagVersionStorage;
+use FHTeam\LaravelRedisCache\TagVersion\TagVersionManager;
+use FHTeam\LaravelRedisCache\TagVersion\TagVersionManagerInterface;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Cache\Repository;
 use Illuminate\Redis\Database;
@@ -31,20 +32,29 @@ abstract class BaseServiceProvider extends ServiceProvider
             $redis = $app['redis'];
 
             // Registering cache driver
-            $cacheManager->extend('amqp', function ($app, array $config) use ($cacheManager, $redis) {
+            $cacheManager->extend('fh-redis', function ($app, array $config) use ($cacheManager, $redis) {
+
                 $connection = array_get($config, 'connection', 'default') ?: 'default';
-                return $this->getRepository($cacheManager, $redis, $this->getPrefix($config), $connection);
-            });
+                $prefix = $this->getPrefix($config);
 
-            // Registering TagVersionStorage to share actual tag versions
-            $this->app->bind(TagVersionStorageInterface::class, function ($connection) use ($redis) {
-                static $cache = [];
-                if (isset($cache[$connection])) {
-                    return $cache[$connection];
-                }
+                // Registering TagVersionStorage to share actual tag versions
+                $this->app->bind(
+                    TagVersionManagerInterface::class,
 
-                // TODO: replace with App::make from config file
-                return $cache[$connection] = new PlainTagVersionStorage($redis, $connection);
+                    function ($connection) use ($redis, $config, $prefix) {
+                        static $cache = [];
+                        if (isset($cache[$connection])) {
+                            return $cache[$connection];
+                        }
+
+                        // TODO: replace with App::make from config file
+                        return $cache[$connection] = new TagVersionManager(
+                            new PlainRedisTagVersionStorage($redis, $connection, $prefix)
+                        );
+                    }
+                );
+
+                return $this->getRepository($cacheManager, $redis, $prefix, $connection);
             });
         });
     }

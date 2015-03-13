@@ -7,7 +7,7 @@ namespace FHTeam\LaravelRedisCache\Utility;
  *
  * @package FHTeam\LaravelRedisCache\Utility
  */
-class Arr
+class ArrayTools
 {
     /**
      * @param string   $prefix

@@ -3,8 +3,8 @@
 namespace FHTeam\LaravelRedisCache\DataLayer\Serialization;
 
 use FHTeam\LaravelRedisCache\DataLayer\CacheItem;
-use FHTeam\LaravelRedisCache\TagVersionStorage\TagVersionStorageInterface;
-use FHTeam\LaravelRedisCache\Utility\Arr;
+use FHTeam\LaravelRedisCache\TagVersion\TagVersionManagerInterface;
+use FHTeam\LaravelRedisCache\Utility\ArrayTools;
 use FHTeam\LaravelRedisCache\Utility\Time;
 
 /**
@@ -15,7 +15,7 @@ use FHTeam\LaravelRedisCache\Utility\Time;
 class Serializer
 {
     /**
-     * @var TagVersionStorageInterface
+     * @var TagVersionManagerInterface
      */
     private $tagVersionStorage;
     /**
@@ -24,10 +24,10 @@ class Serializer
     private $coder;
 
     /**
-     * @param TagVersionStorageInterface $storage
+     * @param TagVersionManagerInterface $storage
      * @param CoderManager               $coderManager
      */
-    public function __construct(TagVersionStorageInterface $storage, CoderManager $coderManager)
+    public function __construct(TagVersionManagerInterface $storage, CoderManager $coderManager)
     {
         $this->tagVersionStorage = $storage;
         $this->coder = $coderManager;
@@ -48,7 +48,7 @@ class Serializer
     {
         $seconds = Time::getTtlInSeconds($minutes);
         $tags = $this->tagVersionStorage->getActualVersionsFor($tags);
-        $data = Arr::addPrefixToArrayKeys($prefix, $data);
+        $data = ArrayTools::addPrefixToArrayKeys($prefix, $data);
 
         $data = array_map(function ($value) use ($seconds, $tags) {
             return CacheItem::encode($this->coder->encode($value), $seconds, $tags);
@@ -67,7 +67,7 @@ class Serializer
      */
     public function deserialize($prefix, array $data)
     {
-        $data = Arr::stripPrefixFromArrayKeys($prefix, $data);
+        $data = ArrayTools::stripPrefixFromArrayKeys($prefix, $data);
 
         $data = array_map(function ($value) {
             return CacheItem::decode($value);
