@@ -35,28 +35,43 @@ class PlainRedisTagVersionStorage implements TagVersionStorageInterface
 
     public function cacheTagVersions(array $tagNames)
     {
-        $needToRequest = array_diff($tagNames, array_keys($this->actualTagVersions));
-        $newTagVersions = $this->connection()->mget($needToRequest);
-        $newTagVersions = ArrayTools::stripPrefixFromArrayKeys($this->prefix, $newTagVersions);
+        // array_values here used for reindexing array from 0
+        $needToRequest = array_values(array_diff($tagNames, array_keys($this->actualTagVersions)));
 
-        //If some tags are new to the server we have to set their current versions
-        if (count($newTagVersions) !== count($needToRequest)) {
-            $this->flushTags(array_diff($needToRequest, $newTagVersions));
+        if (count($needToRequest) < 1) {
+            return;
         }
 
-        $this->actualTagVersions = array_merge($this->actualTagVersions, $newTagVersions);
+        $needToRequestPrefixed = ArrayTools::addPrefixToArrayValues($this->prefix, $needToRequest);
+        $newTagVersions = $this->connection()->mget($needToRequestPrefixed);
+        $newTagVersions = array_combine($needToRequest, $newTagVersions);
+
+
+        $flush = [];
+        foreach ($newTagVersions as $newTagKey => $newTagVersion) {
+            if (!$newTagVersion) {
+                $flush[] = $newTagKey;
+            }
+        }
+
+        $flush = $this->flushTags($flush);
+        $this->actualTagVersions = array_merge($this->actualTagVersions, $newTagVersions, $flush);
     }
 
-    public function flushTags(array $tagNames)
+    public function flushTags(array $tagNames, $version = null)
     {
+        if (empty($tagNames)) {
+            return [];
+        }
         $tags = array_flip($tagNames);
-        $prefixedTags = ArrayTools::addPrefixToArrayKeys($this->prefix, $tags);
-        $version = time();
-        foreach ($prefixedTags as &$tagVersion) {
+        $version = $version ?: time();
+        foreach ($tags as &$tagVersion) {
             $tagVersion = $version;
         }
+        $prefixedTags = ArrayTools::addPrefixToArrayKeys($this->prefix, $tags);
         $this->connection()->mset($prefixedTags);
-        $this->actualTagVersions = array_merge($this->actualTagVersions, $tagNames);
+        $this->actualTagVersions = array_merge($this->actualTagVersions, $tags);
+        return $tags;
     }
 
     public function getTagVersion($tagName)

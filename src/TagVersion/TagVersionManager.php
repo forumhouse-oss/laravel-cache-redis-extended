@@ -30,6 +30,7 @@ class TagVersionManager implements TagVersionManagerInterface
         foreach ($tagNames as $tagName) {
             $result[$tagName] = $this->storage->getTagVersion($tagName);
         }
+
         return $result;
     }
 

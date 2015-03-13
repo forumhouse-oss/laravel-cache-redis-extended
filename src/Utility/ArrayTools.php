@@ -17,11 +17,12 @@ class ArrayTools
      */
     public static function addPrefixToArrayValues($prefix, array $keys)
     {
-        $key = array_map(function ($value) use ($prefix) {
-            return $prefix . $value;
-        }, $keys);
+        $result = [];
+        foreach ($keys as $key => $val) {
+            $result[$key] = $prefix . $val;
+        }
 
-        return $key;
+        return $result;
     }
 
     /**

@@ -9,7 +9,7 @@ class ArrayToolsTest extends TestBase
 {
     public function testAddPrefixToArrayValues()
     {
-        $values = ['aaa', 'bbb'];
+        $values = [0 => 'aaa', 1 => 'bbb'];
         $prefixedValues = ArrayTools::addPrefixToArrayValues('prefix:', $values);
         $this->assertEquals(['prefix:aaa', 'prefix:bbb'], $prefixedValues);
     }
