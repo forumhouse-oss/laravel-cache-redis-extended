@@ -6,7 +6,7 @@ Features:
 
  - All `Cache` facade methods extended to accept arrays as keys to utilize Redis MULTI operations (multi-get, -set, -forget etc.)
  - Redis optimized commands used where appropriate (`EXISTS` in `has()`, `SET...NX` in `add()` etc)
- - No need to do `Cache::tags(...)` when reading data. `Cache::get()` is enough. 
+ - :exclamation: No need to do `Cache::tags(...)` when reading data. `Cache::get()` is enough. 
  So you can now query cache without even knowing which tags are associated with some cache item
  - Tag operations optimized: there will be second Redis query when doing `Cache::tags()` with the same tag set
  - Serialization support:
