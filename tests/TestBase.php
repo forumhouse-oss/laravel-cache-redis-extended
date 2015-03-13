@@ -1,7 +1,8 @@
 <?php
 
-namespace Forumhouse\LaravelAmqp\Tests;
+namespace FHTeam\LaravelRedisCache\Tests;
 
+use FHTeam\LaravelRedisCache\ServiceProvider\Laravel4ServiceProvider;
 use Orchestra\Testbench\TestCase;
 
 /**
@@ -23,23 +24,8 @@ class TestBase extends TestCase
         /** @var \Illuminate\Config\Repository $config */
         $config = $app['config'];
         // reset base path to point to our package's src directory
-        $config->set('queue.connections.amqp', [
-            'driver' => 'amqp',
-            'host' => 'localhost',
-            'port' => '5672',
-            'user' => 'guest',
-            'password' => 'guest',
-            'vhost' => '/',
-            'queue' => null,
-            'queue_flags' => ['durable' => true],
-            'message_properties' => ['delivery_mode' => 2],
-            'channel_id' => null,
-            'exchange_name' => null,
-            'exchange_type' => null,
-            'exchange_flags' => null,
+        $config->set('database.redis.test_connection', [
         ]);
-
-        $config->set('queue.default', 'amqp');
     }
 
     /**
@@ -53,7 +39,7 @@ class TestBase extends TestCase
     protected function getPackageProviders()
     {
         return [
-            'Forumhouse\LaravelAmqp\ServiceProvider\LaravelAmqpServiceProvider',
+            Laravel4ServiceProvider::class,
         ];
     }
 }
