@@ -10,7 +10,7 @@ Features:
  - Redis optimized commands used where appropriate (`EXISTS` in `has()`, `SET...NX` in `add()` etc)
  - :exclamation: No need to do `Cache::tags(...)` when reading data. `Cache::get()` is enough. 
  So you can now query cache without even knowing which tags are associated with some cache item
- - Tag operations optimized: there will be second Redis query when doing `Cache::tags()` with the same tag set
+ - Tag operations optimized: there will be no second Redis query when doing `Cache::tags()` with the same tag set
  - Serialization support:
    - Built-in ability to serialize and deserialize Laravel models with all attributes and relations as a single 
    cache item (Laravel cannot cache models, only queries upon which models are constructed. Each relation in 
