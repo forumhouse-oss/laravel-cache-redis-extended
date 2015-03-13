@@ -1,7 +1,7 @@
 Extended Redis Support for Laravel 4 & 5
 =========================================
 
-[![PHP version](https://badge.fury.io/ph/fhteam%2Flaravel-cache-redis-extended.png)](http://badge.fury.io/ph/fhteam%2Flaravel-cache-redis-extended) [![Laravel compatibility](https://img.shields.io/badge/laravel-4-green.svg)](http://laravel.com/) [![Laravel compatibility](https://img.shields.io/badge/laravel-5-green.svg)](http://laravel.com/)
+[![PHP version](https://badge.fury.io/ph/fhteam%2Flaravel-cache-redis-extended.png)](http://badge.fury.io/ph/fhteam%2Flaravel-cache-redis-extended) [![Laravel compatibility](https://img.shields.io/badge/laravel-4-green.svg)](http://laravel.com/) [![Laravel compatibility](https://img.shields.io/badge/laravel-5-green.svg)](http://laravel.com/) [![Code Climate](https://codeclimate.com/github/fhteam/laravel-cache-redis-extended/badges/gpa.svg)](https://codeclimate.com/github/fhteam/laravel-cache-redis-extended)
 
 Features:
 -----------------------------------------
