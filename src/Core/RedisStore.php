@@ -9,7 +9,7 @@ use FHTeam\LaravelRedisCache\DataLayer\Serialization\SerializerInterface;
 use FHTeam\LaravelRedisCache\TagVersion\TagVersionManagerInterface;
 use FHTeam\LaravelRedisCache\Utility\ArrayTools;
 use FHTeam\LaravelRedisCache\Utility\RedisConnectionTrait;
-use FHTeam\LaravelRedisCache\Utility\Time;
+use FHTeam\LaravelRedisCache\Utility\TimeTools;
 use Illuminate\Cache\TaggableStore;
 use Illuminate\Redis\Database as Redis;
 
@@ -263,7 +263,7 @@ class RedisStore extends TaggableStore
 
         if (0 !== $minutes) {
             $arguments['ex'] = 'EX'; // Arg #3
-            $arguments['seconds'] = Time::getTtlInSeconds($minutes); // Arg #4
+            $arguments['seconds'] = TimeTools::getTtlInSeconds($minutes); // Arg #4
         }
 
         if ($nxOnly) {

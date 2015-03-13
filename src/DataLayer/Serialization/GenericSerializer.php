@@ -5,7 +5,7 @@ namespace FHTeam\LaravelRedisCache\DataLayer\Serialization;
 use FHTeam\LaravelRedisCache\DataLayer\CacheItem;
 use FHTeam\LaravelRedisCache\TagVersion\TagVersionManagerInterface;
 use FHTeam\LaravelRedisCache\Utility\ArrayTools;
-use FHTeam\LaravelRedisCache\Utility\Time;
+use FHTeam\LaravelRedisCache\Utility\TimeTools;
 
 /**
  * Generic serializer implementation
@@ -35,7 +35,7 @@ class GenericSerializer implements SerializerInterface
 
     public function serialize($prefix, array $data, $minutes, $tags)
     {
-        $seconds = Time::getTtlInSeconds($minutes);
+        $seconds = TimeTools::getTtlInSeconds($minutes);
         $tags = $this->tagVersions->getActualVersionsFor($tags);
         $data = ArrayTools::addPrefixToArrayKeys($prefix, $data);
 

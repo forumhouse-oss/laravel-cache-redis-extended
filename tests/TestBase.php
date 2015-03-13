@@ -68,9 +68,11 @@ class TestBase extends TestCase
      * In a normal app environment these would be added to the 'providers' array in
      * the config/app.php file.
      *
+     * @param Application $app
+     *
      * @return array
      */
-    protected function getPackageProviders()
+    protected function getPackageProviders($app)
     {
         if (version_compare("5.0", Application::VERSION)) {
             return [Laravel4ServiceProvider::class,];
