@@ -26,6 +26,16 @@ use Orchestra\Testbench\TestCase;
 class TestBase extends TestCase
 {
     /**
+     * Get base path.
+     *
+     * @return string
+     */
+    protected function getBasePath()
+    {
+        return __DIR__ . '/../';
+    }
+
+    /**
      * Define environment setup.
      *
      * @param  \Illuminate\Foundation\Application $app
@@ -74,10 +84,10 @@ class TestBase extends TestCase
      */
     protected function getPackageProviders($app)
     {
-        if (version_compare("5.0", Application::VERSION)) {
-            return [Laravel4ServiceProvider::class,];
-        } else {
+        if (version_compare(Application::VERSION, "5.0", '>=')) {
             return [Laravel5ServiceProvider::class,];
+        } else {
+            return [Laravel4ServiceProvider::class,];
         }
     }
 }
