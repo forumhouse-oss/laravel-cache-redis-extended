@@ -1,6 +1,6 @@
 <?php
 
-namespace FHTeam\LaravelRedisCache\DataLayer\Serialization;
+namespace FHTeam\LaravelRedisCache\DataLayer\Serializer;
 
 /**
  * Entrance class into serialization

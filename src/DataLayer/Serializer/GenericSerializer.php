@@ -1,6 +1,6 @@
 <?php
 
-namespace FHTeam\LaravelRedisCache\DataLayer\Serialization;
+namespace FHTeam\LaravelRedisCache\DataLayer\Serializer;
 
 use FHTeam\LaravelRedisCache\DataLayer\CacheItem;
 use FHTeam\LaravelRedisCache\TagVersion\TagVersionManagerInterface;

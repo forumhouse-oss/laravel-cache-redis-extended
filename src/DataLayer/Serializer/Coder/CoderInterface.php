@@ -1,6 +1,6 @@
 <?php
 
-namespace FHTeam\LaravelRedisCache\DataLayer\Serialization\Coder;
+namespace FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder;
 
 /**
  * Interface CoderInterface

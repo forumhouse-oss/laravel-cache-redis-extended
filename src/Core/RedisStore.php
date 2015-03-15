@@ -5,7 +5,7 @@ namespace FHTeam\LaravelRedisCache\Core;
 use App;
 use Closure;
 use DateTime;
-use FHTeam\LaravelRedisCache\DataLayer\Serialization\SerializerInterface;
+use FHTeam\LaravelRedisCache\DataLayer\Serializer\SerializerInterface;
 use FHTeam\LaravelRedisCache\TagVersion\TagVersionManagerInterface;
 use FHTeam\LaravelRedisCache\Utility\ArrayTools;
 use FHTeam\LaravelRedisCache\Utility\RedisConnectionTrait;

@@ -1,6 +1,6 @@
 <?php
 
-namespace FHTeam\LaravelRedisCache\DataLayer\Serialization\Coder;
+namespace FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder;
 
 use Exception;
 use Illuminate\Database\Eloquent\Collection;

@@ -1,10 +1,10 @@
 <?php
 
-namespace FHTeam\LaravelRedisCache\DataLayer\Serialization;
+namespace FHTeam\LaravelRedisCache\DataLayer\Serializer;
 
 use Config;
 use Exception;
-use FHTeam\LaravelRedisCache\DataLayer\Serialization\Coder\CoderInterface;
+use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\CoderInterface;
 
 /**
  * Class to manage coders
