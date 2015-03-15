@@ -40,7 +40,11 @@ class GenericSerializer implements SerializerInterface
         $data = ArrayTools::addPrefixToArrayKeys($prefix, $data);
 
         $data = array_map(function ($value) use ($seconds, $tags) {
-            return CacheItem::encode(is_string($value) ? $value : $this->coder->encode($value), $seconds, $tags);
+            return (string)CacheItem::encode(
+                is_string($value) ? $value : $this->coder->encode($value),
+                $seconds,
+                $tags
+            );
         }, $data);
 
 
@@ -52,7 +56,9 @@ class GenericSerializer implements SerializerInterface
         $data = ArrayTools::stripPrefixFromArrayKeys($prefix, $data);
 
         $data = array_map(function ($value) {
-            return is_string($value) ? $value : CacheItem::decode($value);
+            $value = is_string($value) ? $value : $this->coder->decode($value);
+
+            return CacheItem::decode($value);
         }, $data);
 
         /** @var CacheItem[] $data */

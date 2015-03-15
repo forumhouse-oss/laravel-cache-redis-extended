@@ -42,7 +42,7 @@ class CacheItem
      * @param int   $ttl
      * @param array $tags
      *
-     * @return static
+     * @return CacheItem
      */
     public static function encode($value, $ttl, array $tags = [])
     {
@@ -57,7 +57,7 @@ class CacheItem
     /**
      * @param string $data
      *
-     * @return null|static
+     * @return null|CacheItem
      */
     public static function decode($data)
     {
@@ -110,6 +110,7 @@ class CacheItem
     public function setExpires($expires)
     {
         $this->expires = $expires;
+
         return $this;
     }
 
@@ -129,6 +130,7 @@ class CacheItem
     public function setTags($tags)
     {
         $this->tags = $tags;
+
         return $this;
     }
 
@@ -148,6 +150,7 @@ class CacheItem
     public function setValue($value)
     {
         $this->value = $value;
+
         return $this;
     }
 }

@@ -2,11 +2,12 @@
 
 namespace FHTeam\LaravelRedisCache\Tests;
 
-use FHTeam\LaravelRedisCache\DataLayer\Serialization\Coder\EloquentCoder;
-use FHTeam\LaravelRedisCache\DataLayer\Serialization\CoderManagerInterface;
-use FHTeam\LaravelRedisCache\DataLayer\Serialization\GenericCoderManager;
-use FHTeam\LaravelRedisCache\DataLayer\Serialization\GenericSerializer;
-use FHTeam\LaravelRedisCache\DataLayer\Serialization\SerializerInterface;
+use Cache;
+use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\EloquentCoder;
+use FHTeam\LaravelRedisCache\DataLayer\Serializer\CoderManagerInterface;
+use FHTeam\LaravelRedisCache\DataLayer\Serializer\GenericCoderManager;
+use FHTeam\LaravelRedisCache\DataLayer\Serializer\GenericSerializer;
+use FHTeam\LaravelRedisCache\DataLayer\Serializer\SerializerInterface;
 use FHTeam\LaravelRedisCache\ServiceProvider\Laravel4ServiceProvider;
 use FHTeam\LaravelRedisCache\ServiceProvider\Laravel5ServiceProvider;
 use FHTeam\LaravelRedisCache\TagVersion\Storage\PlainRedisTagVersionStorage;
@@ -25,6 +26,11 @@ use Orchestra\Testbench\TestCase;
  */
 class TestBase extends TestCase
 {
+    public function tearDown()
+    {
+        Cache::flush();
+    }
+
     /**
      * Get base path.
      *
@@ -48,7 +54,12 @@ class TestBase extends TestCase
         $config = $app['config'];
 
         // reset base path to point to our package's src directory
-        $config->set('cache.driver', 'fh-redis');
+        $config->set('cache',
+            [
+                'driver' => 'fh-redis',
+                'connection' => 'test_connection'
+            ]
+        );
 
         $app->bind(TagVersionManagerInterface::class, TagVersionManager::class);
         $app->bind(TagVersionStorageInterface::class, function () use ($app) {

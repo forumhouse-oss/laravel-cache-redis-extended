@@ -10,7 +10,7 @@ namespace FHTeam\LaravelRedisCache\DataLayer\Serializer;
 interface CoderManagerInterface
 {
     /**
-     * @param mixed $value
+     * @param array $value
      *
      * @return mixed
      */
