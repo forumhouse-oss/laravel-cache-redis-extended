@@ -22,11 +22,6 @@ class PlainRedisTagVersionStorageTest extends TestBase
         $this->storage = new PlainRedisTagVersionStorage(App::make('redis'), 'test_connection', 'prefix');
     }
 
-    public function tearDown()
-    {
-        Cache::flush();
-    }
-
     public function testCacheTagVersions()
     {
         $this->storage->cacheTagVersions(['testCacheTagVersions_1']);

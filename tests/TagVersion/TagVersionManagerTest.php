@@ -27,11 +27,6 @@ class TagVersionManagerTest extends TestBase
         $this->manager = new TagVersionManager($this->storage);
     }
 
-    public function tearDown()
-    {
-        Cache::flush();
-    }
-
     public function testGetActualVersionsFor()
     {
         $tags = ['testGetActualVersionsFor_0', 'testGetActualVersionsFor_1'];
