@@ -4,6 +4,7 @@ namespace FHTeam\LaravelRedisCache\Tests;
 
 use Cache;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\EloquentCoder;
+use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\PhpSerializeCoder;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\CoderManagerInterface;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\GenericCoderManager;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\GenericSerializer;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Application;
 use Orchestra\Testbench\TestCase;
+use stdClass;
 use SuperClosure\SerializerInterface;
 
 /**
@@ -70,6 +72,8 @@ class TestBase extends TestCase
                 'database' => 0,
             ]
         ]);
+
+        $this->setCacheConfiguration($config);
     }
 
     /**
@@ -122,6 +126,7 @@ class TestBase extends TestCase
         } else {
             $cacheConfigKey = 'cache';
         }
+
         $config->set(
             $cacheConfigKey,
             [
@@ -130,7 +135,14 @@ class TestBase extends TestCase
                 'prefix' => 'prefix',
                 'coders' => [
                     Model::class => EloquentCoder::class,
-                    Collection::class => EloquentCoder::class
+                    Collection::class => EloquentCoder::class,
+                    stdClass::class => PhpSerializeCoder::class,
+                    'arrays' => function ($value) {
+                        if (is_array($value)) {
+                            return new PhpSerializeCoder();
+                        }
+                        return null;
+                    },
                 ],
             ]
         );

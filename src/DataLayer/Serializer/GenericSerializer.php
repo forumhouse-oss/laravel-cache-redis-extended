@@ -55,10 +55,8 @@ class GenericSerializer implements SerializerInterface
     {
         $data = ArrayTools::stripPrefixFromArrayKeys($prefix, $data);
 
-        $data = array_map(function ($value) {
-            $value = is_string($value) ? $value : $this->coder->decode($value);
-
-            return CacheItem::decode($value);
+        $data = array_map(function ($cacheItem) {
+            return CacheItem::decode($cacheItem);
         }, $data);
 
         /** @var CacheItem[] $data */
@@ -73,7 +71,8 @@ class GenericSerializer implements SerializerInterface
                 continue;
             }
 
-            $item = $this->coder->decode($item->getValue());
+            $value = $item->getValue();
+            $item = is_string($value) ? $value : $this->coder->decode($value);
         }
 
         return $data;

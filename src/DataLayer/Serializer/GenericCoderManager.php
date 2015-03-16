@@ -25,9 +25,9 @@ class GenericCoderManager implements CoderManagerInterface
     public function __construct()
     {
         if (version_compare(Application::VERSION, "5.0", '>=')) {
-            $cacheConfigKey = 'cache.stores.redis';
+            $cacheConfigKey = 'cache.stores.redis.coders';
         } else {
-            $cacheConfigKey = 'cache';
+            $cacheConfigKey = 'cache.coders';
         }
 
         $this->coderConfig = Config::get($cacheConfigKey);
@@ -72,8 +72,6 @@ class GenericCoderManager implements CoderManagerInterface
             if (is_string($coderData) && ($value instanceof $valueClass)) {
                 return new $coderData();
             }
-
-            throw new Exception("Unable to treat value as a config for a coder: " . serialize($coderData));
         }
 
         throw new Exception("No coder found to encode value: " . serialize($value));

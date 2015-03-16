@@ -36,13 +36,13 @@ class GenericSerializerTest extends TestBase
 
     public function testSerializeDeserializeStringSimple()
     {
-        $prefix = 'prefix';
+        $prefix = 'prefix:';
 
 
         $data = [
-            'StringThing',
-            'string_thing2',
-            'string_thing_3',
+            'key1' => 'StringThing',
+            'key2' => 'string_thing2',
+            'key3' => 'string_thing_3',
         ];
 
         $minutes = 121212;
@@ -63,9 +63,9 @@ class GenericSerializerTest extends TestBase
         $obj->test1 = 1111;
 
         $data = [
-            'StringThing',
-            ['arrayThing', 111, true],
-            ['obj' => $obj],
+            'key1' => 'StringThing',
+            'key2' => ['arrayThing', 111, true],
+            'key3' => $obj,
         ];
 
         $minutes = 121212;

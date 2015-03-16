@@ -3,7 +3,6 @@
 namespace FHTeam\LaravelRedisCache\Tests\TagVersion;
 
 use App;
-use Cache;
 use FHTeam\LaravelRedisCache\TagVersion\Storage\PlainRedisTagVersionStorage;
 use FHTeam\LaravelRedisCache\TagVersion\TagVersionManager;
 use FHTeam\LaravelRedisCache\Tests\TestBase;
@@ -46,9 +45,9 @@ class TagVersionManagerTest extends TestBase
 
     public function testAnyTagExpired()
     {
-        $tags = ['testGetActualVersionsFor_0', 'testGetActualVersionsFor_1'];
+        $tags = ['testAnyTagExpired_0', 'testAnyTagExpired_1'];
         $this->manager->getActualVersionsFor($tags);
-        $this->assertTrue($this->manager->isAnyTagExpired(["testGetActualVersionsFor_0" => time() - 1000]));
-        $this->assertFalse($this->manager->isAnyTagExpired(["testGetActualVersionsFor_3" => time()]));
+        $this->assertTrue($this->manager->isAnyTagExpired(["testAnyTagExpired_0" => time() - 1000]));
+        $this->assertFalse($this->manager->isAnyTagExpired(["testAnyTagExpired_3" => time()]));
     }
 }
