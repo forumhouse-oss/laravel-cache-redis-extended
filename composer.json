@@ -10,13 +10,14 @@
   "require-dev": {
     "laravel/framework": ">=4.0.0",
     "squizlabs/php_codesniffer": "1.*",
-    "orchestra/testbench": "3.0.4",
+    "orchestra/testbench": "~3.0",
     "phpunit/phpunit": "4.3.*"
   },
   "autoload": {
     "psr-4": {
       "FHTeam\\LaravelRedisCache\\": "src/",
-      "FHTeam\\LaravelRedisCache\\Tests\\": "tests/"
+      "FHTeam\\LaravelRedisCache\\Tests\\": "tests/src",
+      "FHTeam\\LaravelRedisCache\\Tests\\Fixtures\\": "tests/fixtures"
     }
   }
 }

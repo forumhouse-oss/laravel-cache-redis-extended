@@ -20,9 +20,11 @@ class GenericCoderManager implements CoderManagerInterface
     protected $coderConfig = [];
 
     /**
+     * @param null|array $config Configuration for coders or null to fetch from Laravel configuration
+     *
      * @throws Exception
      */
-    public function __construct()
+    public function __construct($config = null)
     {
         if (version_compare(Application::VERSION, "5.0", '>=')) {
             $cacheConfigKey = 'cache.stores.redis.coders';
@@ -30,7 +32,7 @@ class GenericCoderManager implements CoderManagerInterface
             $cacheConfigKey = 'cache.coders';
         }
 
-        $this->coderConfig = Config::get($cacheConfigKey);
+        $this->coderConfig = $config ?: Config::get($cacheConfigKey);
 
         if (!is_array($this->coderConfig)) {
             throw new Exception("You should configure coders as array at '$cacheConfigKey'");

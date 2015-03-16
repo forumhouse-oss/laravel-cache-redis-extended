@@ -8,6 +8,7 @@ use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\PhpSerializeCoder;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\CoderManagerInterface;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\GenericCoderManager;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\GenericSerializer;
+use FHTeam\LaravelRedisCache\DataLayer\Serializer\SerializerInterface;
 use FHTeam\LaravelRedisCache\ServiceProvider\Laravel4ServiceProvider;
 use FHTeam\LaravelRedisCache\ServiceProvider\Laravel5ServiceProvider;
 use FHTeam\LaravelRedisCache\TagVersion\Storage\PlainRedisTagVersionStorage;
@@ -17,10 +18,10 @@ use FHTeam\LaravelRedisCache\TagVersion\TagVersionManagerInterface;
 use Illuminate\Config\Repository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Seeder;
 use Illuminate\Foundation\Application;
 use Orchestra\Testbench\TestCase;
 use stdClass;
-use SuperClosure\SerializerInterface;
 
 /**
  * Class LaravelAmqpTestBase
@@ -41,7 +42,7 @@ class TestBase extends TestCase
      */
     protected function getBasePath()
     {
-        return realpath(__DIR__ . '/../');
+        return realpath(__DIR__ . '/../../');
     }
 
     /**
@@ -56,24 +57,9 @@ class TestBase extends TestCase
         /** @var Repository $config */
         $config = $app['config'];
 
-        $app->bind(TagVersionManagerInterface::class, TagVersionManager::class);
-        $app->bind(TagVersionStorageInterface::class, function () use ($app) {
-            return new PlainRedisTagVersionStorage($app['redis'], 'test_connection', 'tag_test');
-        });
-
-        $app->bind(SerializerInterface::class, GenericSerializer::class);
-        $app->bind(CoderManagerInterface::class, GenericCoderManager::class);
-
-        $config->set('database.redis', [
-            'cluster' => false,
-            'test_connection' => [
-                'host' => '127.0.0.1',
-                'port' => 6379,
-                'database' => 0,
-            ]
-        ]);
-
-        $this->setCacheConfiguration($config);
+        $this->configureDatabase($app);
+        $this->bindClasses($app);
+        $this->configureCache($config);
     }
 
     /**
@@ -107,6 +93,7 @@ class TestBase extends TestCase
         return [
             'Illuminate\Foundation\Providers\ArtisanServiceProvider',
             'Illuminate\Cache\CacheServiceProvider',
+            'Illuminate\Filesystem\FilesystemServiceProvider',
             'Illuminate\Foundation\Providers\ConsoleSupportServiceProvider',
             'Illuminate\Database\DatabaseServiceProvider',
             'Orchestra\Database\MigrationServiceProvider',
@@ -115,11 +102,29 @@ class TestBase extends TestCase
         ];
     }
 
+    protected function getApplicationAliases($app)
+    {
+        $result = parent::getApplicationAliases($app);
+        $result['Seeder'] = Seeder::class;
+
+        return $result;
+    }
+
+
     /**
      * @param Repository $config
      */
-    protected function setCacheConfiguration(Repository $config)
+    protected function configureCache(Repository $config)
     {
+
+        $config->set('database.redis', [
+            'cluster' => false,
+            'test_connection' => [
+                'host' => '127.0.0.1',
+                'port' => 6379,
+                'database' => 0,
+            ]
+        ]);
 
         if (version_compare(Application::VERSION, "5.0", '>=')) {
             $cacheConfigKey = 'cache.stores.redis';
@@ -146,5 +151,32 @@ class TestBase extends TestCase
                 ],
             ]
         );
+    }
+
+    /**
+     * @param Application $app
+     */
+    protected function bindClasses($app)
+    {
+        $app->bind(TagVersionManagerInterface::class, TagVersionManager::class);
+        $app->bind(TagVersionStorageInterface::class, function () use ($app) {
+            return new PlainRedisTagVersionStorage($app['redis'], 'test_connection', 'tag_test');
+        });
+
+        $app->bind(SerializerInterface::class, GenericSerializer::class);
+        $app->bind(CoderManagerInterface::class, GenericCoderManager::class);
+    }
+
+    /**
+     * @param Application $app
+     */
+    protected function configureDatabase($app)
+    {
+        $app['config']->set('database.default', 'test');
+        $app['config']->set('database.connections.test', [
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+            'prefix' => '',
+        ]);
     }
 }
