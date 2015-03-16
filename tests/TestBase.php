@@ -7,17 +7,18 @@ use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\EloquentCoder;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\CoderManagerInterface;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\GenericCoderManager;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\GenericSerializer;
-use FHTeam\LaravelRedisCache\DataLayer\Serializer\SerializerInterface;
 use FHTeam\LaravelRedisCache\ServiceProvider\Laravel4ServiceProvider;
 use FHTeam\LaravelRedisCache\ServiceProvider\Laravel5ServiceProvider;
 use FHTeam\LaravelRedisCache\TagVersion\Storage\PlainRedisTagVersionStorage;
 use FHTeam\LaravelRedisCache\TagVersion\Storage\TagVersionStorageInterface;
 use FHTeam\LaravelRedisCache\TagVersion\TagVersionManager;
 use FHTeam\LaravelRedisCache\TagVersion\TagVersionManagerInterface;
+use Illuminate\Config\Repository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Application;
 use Orchestra\Testbench\TestCase;
+use SuperClosure\SerializerInterface;
 
 /**
  * Class LaravelAmqpTestBase
@@ -38,7 +39,7 @@ class TestBase extends TestCase
      */
     protected function getBasePath()
     {
-        return __DIR__ . '/../';
+        return realpath(__DIR__ . '/../');
     }
 
     /**
@@ -50,16 +51,8 @@ class TestBase extends TestCase
      */
     protected function getEnvironmentSetUp($app)
     {
-        /** @var \Illuminate\Config\Repository $config */
+        /** @var Repository $config */
         $config = $app['config'];
-
-        // reset base path to point to our package's src directory
-        $config->set('cache',
-            [
-                'driver' => 'fh-redis',
-                'connection' => 'test_connection'
-            ]
-        );
 
         $app->bind(TagVersionManagerInterface::class, TagVersionManager::class);
         $app->bind(TagVersionStorageInterface::class, function () use ($app) {
@@ -72,13 +65,9 @@ class TestBase extends TestCase
         $config->set('database.redis', [
             'cluster' => false,
             'test_connection' => [
-                'host' => 'localhost',
+                'host' => '127.0.0.1',
                 'port' => 6379,
                 'database' => 0,
-                'coders' => [
-                    Model::class => EloquentCoder::class,
-                    Collection::class => EloquentCoder::class
-                ],
             ]
         ]);
     }
@@ -100,5 +89,50 @@ class TestBase extends TestCase
         } else {
             return [Laravel4ServiceProvider::class,];
         }
+    }
+
+    /**
+     * Getting rid of unused service providers
+     *
+     * @param  \Illuminate\Foundation\Application $app
+     *
+     * @return array
+     */
+    protected function getApplicationProviders($app)
+    {
+        return [
+            'Illuminate\Foundation\Providers\ArtisanServiceProvider',
+            'Illuminate\Cache\CacheServiceProvider',
+            'Illuminate\Foundation\Providers\ConsoleSupportServiceProvider',
+            'Illuminate\Database\DatabaseServiceProvider',
+            'Orchestra\Database\MigrationServiceProvider',
+            'Illuminate\Redis\RedisServiceProvider',
+            'Illuminate\Database\SeedServiceProvider',
+        ];
+    }
+
+    /**
+     * @param Repository $config
+     */
+    protected function setCacheConfiguration(Repository $config)
+    {
+
+        if (version_compare(Application::VERSION, "5.0", '>=')) {
+            $cacheConfigKey = 'cache.stores.redis';
+        } else {
+            $cacheConfigKey = 'cache';
+        }
+        $config->set(
+            $cacheConfigKey,
+            [
+                'driver' => 'fh-redis',
+                'connection' => 'test_connection',
+                'prefix' => 'prefix',
+                'coders' => [
+                    Model::class => EloquentCoder::class,
+                    Collection::class => EloquentCoder::class
+                ],
+            ]
+        );
     }
 }

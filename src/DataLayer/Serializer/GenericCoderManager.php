@@ -5,6 +5,7 @@ namespace FHTeam\LaravelRedisCache\DataLayer\Serializer;
 use Config;
 use Exception;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\CoderInterface;
+use Illuminate\Foundation\Application;
 
 /**
  * Class to manage coders
@@ -13,6 +14,29 @@ use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\CoderInterface;
  */
 class GenericCoderManager implements CoderManagerInterface
 {
+    /**
+     * @var array
+     */
+    protected $coderConfig = [];
+
+    /**
+     * @throws Exception
+     */
+    public function __construct()
+    {
+        if (version_compare(Application::VERSION, "5.0", '>=')) {
+            $cacheConfigKey = 'cache.stores.redis';
+        } else {
+            $cacheConfigKey = 'cache';
+        }
+
+        $this->coderConfig = Config::get($cacheConfigKey);
+
+        if (!is_array($this->coderConfig)) {
+            throw new Exception("You should configure coders as array at '$cacheConfigKey'");
+        }
+    }
+
     public function decode(array $value)
     {
         $coderClass = $value['coder'];
@@ -40,15 +64,7 @@ class GenericCoderManager implements CoderManagerInterface
      */
     protected function getCoder($value)
     {
-        $connection = Config::get('cache.connection', 'default');
-
-        $coderConfiguration = Config::get("database.redis.{$connection}.coders");
-
-        if (!is_array($coderConfiguration)) {
-            throw new Exception("You should configure coders at 'database.redis.{$connection}.coders'");
-        }
-
-        foreach ($coderConfiguration as $valueClass => $coderData) {
+        foreach ($this->coderConfig as $valueClass => $coderData) {
             if (is_callable($coderData) && ($coderClass = $coderData($value))) {
                 return $coderClass;
             }
