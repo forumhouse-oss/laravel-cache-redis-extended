@@ -8503,7 +8503,7 @@ namespace {
     }
 
 
-    class Redis extends \Illuminate\Support\Facades\Redis
+    class RedisAPI extends \Illuminate\Support\Facades\Redis
     {
 
         /**

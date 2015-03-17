@@ -24,7 +24,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Redis as RedisFacade;
 use Orchestra\Testbench\TestCase;
-use Redis;
+use RedisAPI;
 use stdClass;
 
 /**
@@ -37,7 +37,7 @@ class TestBase extends TestCase
     public function tearDown()
     {
         // Cache::flush();
-        Redis::connection('test_connection')->flushdb();
+        RedisAPI::connection('test_connection')->flushdb();
         //TODO: check why provider has not connected our custom Redis store
     }
 
@@ -112,7 +112,7 @@ class TestBase extends TestCase
     {
         $result = parent::getApplicationAliases($app);
         $result['Seeder'] = Seeder::class;
-        $result['Redis'] = RedisFacade::class;
+        $result['RedisAPI'] = RedisFacade::class;
 
         return $result;
     }
