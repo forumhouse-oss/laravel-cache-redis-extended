@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Seeder;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Redis as RedisFacade;
 use Orchestra\Testbench\TestCase;
 use Redis;
 use stdClass;
@@ -111,6 +112,7 @@ class TestBase extends TestCase
     {
         $result = parent::getApplicationAliases($app);
         $result['Seeder'] = Seeder::class;
+        $result['Redis'] = RedisFacade::class;
 
         return $result;
     }
