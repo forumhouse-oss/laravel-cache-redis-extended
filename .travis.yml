@@ -6,9 +6,15 @@ php:
   - hhvm
   - hhvm-nightly
 
+matrix:
+    allow_failures:
+        - php: hhvm
+        - php: hhvm-nighly
+        - php: 7.0
+
 before_script:
   - composer self-update
-  - composer install --prefer-dist --dev
+  - composer install --prefer-dist
 
 services:
   - redis-server
