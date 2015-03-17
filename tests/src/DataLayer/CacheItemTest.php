@@ -29,7 +29,8 @@ class CacheItemTest extends TestBase
         $decoded = CacheItem::decode($encoded);
 
         $this->assertEquals($value, $decoded->getValue());
-        $this->assertEquals($ttl + time(), $decoded->getExpires());
+        $this->assertGreaterThanOrEqual($ttl + time(), $decoded->getExpires());
+        $this->assertLessThanOrEqual($ttl + time() + 1, $decoded->getExpires());
         $this->assertEquals($tags, $decoded->getTags());
     }
 }
