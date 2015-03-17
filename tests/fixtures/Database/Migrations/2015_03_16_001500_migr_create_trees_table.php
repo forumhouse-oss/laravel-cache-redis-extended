@@ -12,15 +12,16 @@ class MigrCreateTreesTable extends Migration
      */
     public function up()
     {
-        Schema::create('trees', function (Blueprint $table) {
-            $table->increments('id');
+        Schema::create(
+            'trees',
+            function (Blueprint $table) {
+                $table->increments('id');
 
-            $table->string('type');
-            $table->integer('age'); // how old is the tree
-            $table->integer('bear_id'); // which bear climbs this tree
-
-            $table->timestamps();
-        });
+                $table->string('type');
+                $table->integer('age'); // how old is the tree
+                $table->integer('bear_id'); // which bear climbs this tree
+            }
+        );
     }
 
     public function down()

@@ -12,14 +12,15 @@ class MigrCreateFishTable extends Migration
      */
     public function up()
     {
-        Schema::create('fish', function (Blueprint $table) {
-            $table->increments('id');
+        Schema::create(
+            'fish',
+            function (Blueprint $table) {
+                $table->increments('id');
 
-            $table->integer('weight'); // we'll use this to demonstrate searching by weight
-            $table->integer('bear_id'); // this will contain our foreign key to the bears table
-
-            $table->timestamps();
-        });
+                $table->integer('weight'); // we'll use this to demonstrate searching by weight
+                $table->integer('bear_id'); // this will contain our foreign key to the bears table
+            }
+        );
     }
 
     public function down()

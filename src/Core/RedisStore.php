@@ -78,7 +78,7 @@ class RedisStore extends TaggableStore
      */
     public function has($key)
     {
-        return $this->connection()->exists($this->prefix . $key);
+        return $this->connection()->exists($this->prefix.$key);
     }
 
     /**
@@ -182,7 +182,7 @@ class RedisStore extends TaggableStore
      */
     public function increment($key, $value = 1)
     {
-        return $this->connection()->incrby($this->prefix . $key, $value);
+        return $this->connection()->incrby($this->prefix.$key, $value);
     }
 
     /**
@@ -196,7 +196,7 @@ class RedisStore extends TaggableStore
      */
     public function decrement($key, $value = 1)
     {
-        return $this->connection()->decrby($this->prefix . $key, $value);
+        return $this->connection()->decrby($this->prefix.$key, $value);
     }
 
     /**
@@ -308,6 +308,7 @@ class RedisStore extends TaggableStore
     public function tags($names)
     {
         $tags = is_array($names) ? $names : func_get_args();
+
         return new static($this->redis, $this->prefix, $this->connection, $tags);
     }
 }

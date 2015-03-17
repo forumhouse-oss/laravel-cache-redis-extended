@@ -3,7 +3,9 @@
 namespace FHTeam\LaravelRedisCache\Tests;
 
 use Cache;
-use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\EloquentCoder;
+use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent\CollectionCoder;
+use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent\ModelCoder;
+use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent\PivotCoder;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\PhpSerializeCoder;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\CoderManagerInterface;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\GenericCoderManager;
@@ -18,6 +20,7 @@ use FHTeam\LaravelRedisCache\TagVersion\TagVersionManagerInterface;
 use Illuminate\Config\Repository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Seeder;
 use Illuminate\Foundation\Application;
 use Orchestra\Testbench\TestCase;
@@ -42,7 +45,7 @@ class TestBase extends TestCase
      */
     protected function getBasePath()
     {
-        return realpath(__DIR__ . '/../../');
+        return realpath(__DIR__.'/../../');
     }
 
     /**
@@ -110,21 +113,23 @@ class TestBase extends TestCase
         return $result;
     }
 
-
     /**
      * @param Repository $config
      */
     protected function configureCache(Repository $config)
     {
 
-        $config->set('database.redis', [
-            'cluster' => false,
-            'test_connection' => [
-                'host' => '127.0.0.1',
-                'port' => 6379,
-                'database' => 0,
+        $config->set(
+            'database.redis',
+            [
+                'cluster' => false,
+                'test_connection' => [
+                    'host' => '127.0.0.1',
+                    'port' => 6379,
+                    'database' => 0,
+                ]
             ]
-        ]);
+        );
 
         if (version_compare(Application::VERSION, "5.0", '>=')) {
             $cacheConfigKey = 'cache.stores.redis';
@@ -139,13 +144,15 @@ class TestBase extends TestCase
                 'connection' => 'test_connection',
                 'prefix' => 'prefix',
                 'coders' => [
-                    Model::class => EloquentCoder::class,
-                    Collection::class => EloquentCoder::class,
+                    Pivot::class => PivotCoder::class,
+                    Model::class => ModelCoder::class,
+                    Collection::class => CollectionCoder::class,
                     stdClass::class => PhpSerializeCoder::class,
                     'arrays' => function ($value) {
                         if (is_array($value)) {
                             return new PhpSerializeCoder();
                         }
+
                         return null;
                     },
                 ],
@@ -159,9 +166,12 @@ class TestBase extends TestCase
     protected function bindClasses($app)
     {
         $app->bind(TagVersionManagerInterface::class, TagVersionManager::class);
-        $app->bind(TagVersionStorageInterface::class, function () use ($app) {
-            return new PlainRedisTagVersionStorage($app['redis'], 'test_connection', 'tag_test');
-        });
+        $app->bind(
+            TagVersionStorageInterface::class,
+            function () use ($app) {
+                return new PlainRedisTagVersionStorage($app['redis'], 'test_connection', 'tag_test');
+            }
+        );
 
         $app->bind(SerializerInterface::class, GenericSerializer::class);
         $app->bind(CoderManagerInterface::class, GenericCoderManager::class);
@@ -173,10 +183,13 @@ class TestBase extends TestCase
     protected function configureDatabase($app)
     {
         $app['config']->set('database.default', 'test');
-        $app['config']->set('database.connections.test', [
-            'driver' => 'sqlite',
-            'database' => ':memory:',
-            'prefix' => '',
-        ]);
+        $app['config']->set(
+            'database.connections.test',
+            [
+                'driver' => 'sqlite',
+                'database' => ':memory:',
+                'prefix' => '',
+            ]
+        );
     }
 }

@@ -17,14 +17,20 @@ class DatabaseTestBase extends TestBase
             throw new Exception("Migrations path does not exist");
         }
 
-        $this->artisan('migrate', [
-            '--database' => 'test',
-            '--path' => $migrationsPath,
-        ]);
+        $this->artisan(
+            'migrate',
+            [
+                '--database' => 'test',
+                '--path' => $migrationsPath,
+            ]
+        );
 
-        $this->artisan('db:seed', [
-            '--class' => DatabaseSeeder::class
-        ]);
+        $this->artisan(
+            'db:seed',
+            [
+                '--class' => DatabaseSeeder::class
+            ]
+        );
 
     }
 }

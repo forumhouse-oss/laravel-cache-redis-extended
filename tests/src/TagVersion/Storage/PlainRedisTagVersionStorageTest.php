@@ -3,7 +3,6 @@
 namespace FHTeam\LaravelRedisCache\Tests\TagVersion\Storage;
 
 use App;
-use Cache;
 use Exception;
 use FHTeam\LaravelRedisCache\TagVersion\Storage\PlainRedisTagVersionStorage;
 use FHTeam\LaravelRedisCache\TagVersion\Storage\TagVersionStorageInterface;

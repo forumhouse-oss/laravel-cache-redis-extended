@@ -2,6 +2,8 @@
 
 namespace FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder;
 
+use FHTeam\LaravelRedisCache\DataLayer\Serializer\CoderManagerInterface;
+
 /**
  * Interface CoderInterface
  *
@@ -9,6 +11,13 @@ namespace FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder;
  */
 interface CoderInterface
 {
+    /**
+     * @param CoderManagerInterface $value
+     *
+*@return void
+     */
+    public function setCoderManager(CoderManagerInterface $value);
+
     /**
      * @param mixed $value
      *
@@ -19,7 +28,7 @@ interface CoderInterface
     /**
      * @param mixed $value
      *
-     * @return mixed
+     * @return array
      */
     public function encode($value);
 }

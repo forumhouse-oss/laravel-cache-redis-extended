@@ -9,6 +9,8 @@ namespace FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder;
  */
 class PhpSerializeCoder implements CoderInterface
 {
+    use CoderManagerTrait;
+
     /**
      * @param mixed $value
      *

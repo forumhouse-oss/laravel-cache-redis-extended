@@ -42,6 +42,7 @@ class TagVersionManager implements TagVersionManagerInterface
                 return true;
             }
         }
+
         return false;
     }
 

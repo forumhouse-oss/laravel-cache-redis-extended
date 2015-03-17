@@ -6,6 +6,9 @@ use Eloquent;
 
 class Picnic extends Eloquent
 {
+
+    public $timestamps = false;
+
     // MASS ASSIGNMENT -------------------------------------------------------
     // define which attributes are mass assignable (for security)
     // we only want these 3 attributes able to be filled
@@ -16,6 +19,6 @@ class Picnic extends Eloquent
     // also call the linking table
     public function bears()
     {
-        return $this->belongsToMany(Bear::class, 'bears_picnics', 'picnic_id', 'bear_id');
+        return $this->belongsToMany(Bear::class);
     }
 }

@@ -49,13 +49,24 @@ class GenericCoderManager implements CoderManagerInterface
 
         /** @var CoderInterface $coder */
         $coder = new $coderClass();
-        return $coder->decode($value['data']);
+        $coder->setCoderManager($this);
+
+        $decoded = $coder->decode($value['data']);
+
+        return $decoded;
     }
 
     public function encode($value)
     {
         $coder = $this->getCoder($value);
-        return ['coder' => get_class($coder), 'data' => $coder->encode($value)];
+        $coder->setCoderManager($this);
+
+        $encoded = $coder->encode($value);
+
+        $coderClass = get_class($coder);
+        $this->assertEncodedValueValid($encoded, $coderClass);
+
+        return ['coder' => $coderClass, 'data' => $encoded];
     }
 
     /**
@@ -76,6 +87,22 @@ class GenericCoderManager implements CoderManagerInterface
             }
         }
 
-        throw new Exception("No coder found to encode value: " . serialize($value));
+        throw new Exception("No coder found to encode value: ".serialize($value));
+    }
+
+    /**
+     * @param $encoded
+     * @param $coderClass
+     *
+     * @throws Exception
+     */
+    protected function assertEncodedValueValid($encoded, $coderClass)
+    {
+        if (!is_array($encoded)) {
+            $serializedEncoded = serialize($encoded);
+            throw new Exception(
+                "Encoder '$coderClass' returned invalid data. Expected array, got '$serializedEncoded'"
+            );
+        }
     }
 }

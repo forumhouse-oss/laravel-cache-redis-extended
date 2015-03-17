@@ -29,6 +29,7 @@ class TimeTools
             if ($fromNow < 0) {
                 throw new Exception("Cache TTL should be >=0");
             }
+
             return $fromNow;
         }
 

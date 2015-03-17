@@ -12,15 +12,16 @@ class MigrCreateBearsTable extends Migration
      */
     public function up()
     {
-        Schema::create('bears', function (Blueprint $table) {
-            $table->increments('id');
+        Schema::create(
+            'bears',
+            function (Blueprint $table) {
+                $table->increments('id');
 
-            $table->string('name');
-            $table->string('type');
-            $table->integer('danger_level'); // this will be between 1-10
-
-            $table->timestamps();
-        });
+                $table->string('name');
+                $table->string('type');
+                $table->integer('danger_level'); // this will be between 1-10
+            }
+        );
     }
 
     public function down()

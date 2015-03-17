@@ -39,13 +39,16 @@ class GenericSerializer implements SerializerInterface
         $tags = $this->tagVersions->getActualVersionsFor($tags);
         $data = ArrayTools::addPrefixToArrayKeys($prefix, $data);
 
-        $data = array_map(function ($value) use ($seconds, $tags) {
-            return (string)CacheItem::encode(
-                is_string($value) ? $value : $this->coder->encode($value),
-                $seconds,
-                $tags
-            );
-        }, $data);
+        $data = array_map(
+            function ($value) use ($seconds, $tags) {
+                return (string)CacheItem::encode(
+                    is_string($value) ? $value : $this->coder->encode($value),
+                    $seconds,
+                    $tags
+                );
+            },
+            $data
+        );
 
 
         return $data;
@@ -55,9 +58,12 @@ class GenericSerializer implements SerializerInterface
     {
         $data = ArrayTools::stripPrefixFromArrayKeys($prefix, $data);
 
-        $data = array_map(function ($cacheItem) {
-            return CacheItem::decode($cacheItem);
-        }, $data);
+        $data = array_map(
+            function ($cacheItem) {
+                return CacheItem::decode($cacheItem);
+            },
+            $data
+        );
 
         /** @var CacheItem[] $data */
         foreach ($data as &$item) {

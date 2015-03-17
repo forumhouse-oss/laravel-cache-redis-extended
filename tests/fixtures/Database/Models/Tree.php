@@ -6,6 +6,9 @@ use Eloquent;
 
 class Tree extends Eloquent
 {
+
+    public $timestamps = false;
+
     // MASS ASSIGNMENT -------------------------------------------------------
     // define which attributes are mass assignable (for security)
     // we only want these 3 attributes able to be filled

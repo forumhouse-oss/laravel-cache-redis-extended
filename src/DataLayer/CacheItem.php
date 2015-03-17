@@ -82,11 +82,13 @@ class CacheItem
      */
     public function __toString()
     {
-        return serialize([
-            self::IDX_RAW_VALUE => $this->getValue(),
-            self::IDX_EXPIRES => $this->getExpires(),
-            self::IDX_TAGS => $this->getTags(),
-        ]);
+        return serialize(
+            [
+                self::IDX_RAW_VALUE => $this->getValue(),
+                self::IDX_EXPIRES => $this->getExpires(),
+                self::IDX_TAGS => $this->getTags(),
+            ]
+        );
     }
 
     public function isExpired()

@@ -38,7 +38,7 @@ trait RedisConnectionTrait
     {
         $this->redis = $redis;
         $this->connection = $connection;
-        $this->prefix = rtrim($prefix, ':') . ':';
+        $this->prefix = rtrim($prefix, ':').':';
     }
 
     /**

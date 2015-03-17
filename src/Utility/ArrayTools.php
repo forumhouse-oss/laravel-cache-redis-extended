@@ -19,7 +19,7 @@ class ArrayTools
     {
         $result = [];
         foreach ($keys as $key => $val) {
-            $result[$key] = $prefix . $val;
+            $result[$key] = $prefix.$val;
         }
 
         return $result;
@@ -35,7 +35,7 @@ class ArrayTools
     {
         $result = [];
         foreach ($array as $key => $val) {
-            $result[$prefix . $key] = $val;
+            $result[$prefix.$key] = $val;
         }
 
         return $result;

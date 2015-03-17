@@ -30,7 +30,7 @@ class PlainRedisTagVersionStorage implements TagVersionStorageInterface
      */
     public function __construct(Database $redis, $connection, $prefix)
     {
-        $this->setRedisConnectionData($redis, $connection, $prefix . ($prefix ? ':' : '') . 'tags');
+        $this->setRedisConnectionData($redis, $connection, $prefix.($prefix ? ':' : '').'tags');
     }
 
     public function cacheTagVersions(array $tagNames)
@@ -71,6 +71,7 @@ class PlainRedisTagVersionStorage implements TagVersionStorageInterface
         $prefixedTags = ArrayTools::addPrefixToArrayKeys($this->prefix, $tags);
         $this->connection()->mset($prefixedTags);
         $this->actualTagVersions = array_merge($this->actualTagVersions, $tags);
+
         return $tags;
     }
 
@@ -81,6 +82,7 @@ class PlainRedisTagVersionStorage implements TagVersionStorageInterface
                 "Version for tag '$tagName' should be requested using ensureTagVersionsPresent() first"
             );
         }
+
         return $this->actualTagVersions[$tagName];
     }
 }

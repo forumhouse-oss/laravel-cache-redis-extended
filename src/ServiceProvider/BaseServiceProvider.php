@@ -22,21 +22,27 @@ abstract class BaseServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->booted(function ($app) {
-            /** @var CacheManager $cacheManager */
-            $cacheManager = $app['cache'];
+        $this->app->booted(
+            function ($app) {
+                /** @var CacheManager $cacheManager */
+                $cacheManager = $app['cache'];
 
-            // Registering cache driver
-            $cacheManager->extend('fh-redis', function ($app, array $config) use ($cacheManager) {
+                // Registering cache driver
+                $cacheManager->extend(
+                    'fh-redis',
+                    function ($app, array $config) use ($cacheManager) {
 
-                /** @var Application $app */
-                /** @var Database $redis */
-                $redis = $app['redis'];
-                $connection = array_get($config, 'connection', 'default') ?: 'default';
-                $prefix = $this->getPrefix($config);
-                return $this->getRepository($cacheManager, $redis, $prefix, $connection);
-            });
-        });
+                        /** @var Application $app */
+                        /** @var Database $redis */
+                        $redis = $app['redis'];
+                        $connection = array_get($config, 'connection', 'default') ?: 'default';
+                        $prefix = $this->getPrefix($config);
+
+                        return $this->getRepository($cacheManager, $redis, $prefix, $connection);
+                    }
+                );
+            }
+        );
     }
 
     /**

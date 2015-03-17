@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 
-class MigrCreatePicnicsTable extends Migration
+class MigrCreateBearPicnicTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,12 @@ class MigrCreatePicnicsTable extends Migration
     public function up()
     {
         Schema::create(
-            'picnics',
+            'bear_picnic',
             function (Blueprint $table) {
                 $table->increments('id');
 
-                $table->string('name');
-                $table->integer('taste_level'); // how tasty is this picnic?
+                $table->integer('bear_id'); // the id of the bear
+                $table->integer('picnic_id'); // the id of the picnic that this bear is at
             }
         );
     }
