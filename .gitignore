@@ -4,5 +4,5 @@
 # Laravel
 Thumbs.db
 _ide_helper_models.php
-vendor
+/vendor
 composer.lock
