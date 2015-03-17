@@ -38,17 +38,18 @@ class CacheItem
     protected $value;
 
     /**
-     * @param mixed $value
-     * @param int   $ttl
-     * @param array $tags
+     * @param mixed    $value
+     * @param int      $ttl
+     * @param array    $tags
+     * @param null|int $now
      *
      * @return CacheItem
      */
-    public static function encode($value, $ttl, array $tags = [])
+    public static function encode($value, $ttl, array $tags = [], $now = null)
     {
         $obj = new static();
         $obj->setValue($value);
-        $obj->setExpires(time() + $ttl);
+        $obj->setExpires(($now ?: time()) + $ttl);
         $obj->setTags($tags);
 
         return $obj;

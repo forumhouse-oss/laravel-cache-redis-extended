@@ -23,14 +23,14 @@ class CacheItemTest extends TestBase
 
         $ttl = rand(0, 100000000);
         $tags = ['Tag1', 'Tag2'];
+        $now = time();
 
-        $encoded = (string)CacheItem::encode($value, $ttl, $tags);
+        $encoded = (string)CacheItem::encode($value, $ttl, $tags, $now);
 
         $decoded = CacheItem::decode($encoded);
 
         $this->assertEquals($value, $decoded->getValue());
-        $this->assertGreaterThanOrEqual($ttl + time(), $decoded->getExpires());
-        $this->assertLessThanOrEqual($ttl + time() + 1, $decoded->getExpires());
+        $this->assertEquals($ttl + $now, $decoded->getExpires());
         $this->assertEquals($tags, $decoded->getTags());
     }
 }
