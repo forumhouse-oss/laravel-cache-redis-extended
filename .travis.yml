@@ -1,3 +1,4 @@
+sudo: false
 language: php
 php:
   - 5.5
@@ -11,10 +12,16 @@ matrix:
         - php: hhvm
         - php: hhvm-nighly
         - php: 7.0
+    fast_finish: true
 
 before_script:
-  - composer self-update
-  - composer install --prefer-dist
+  - travis_retry composer self-update
+  - travis_retry composer install --prefer-dist --no-interaction
 
 services:
   - redis-server
+
+cache:
+  directories:
+    - vendor
+    - $HOME/.composer/cache
