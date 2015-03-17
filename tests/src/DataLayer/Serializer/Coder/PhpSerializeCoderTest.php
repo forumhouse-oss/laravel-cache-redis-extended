@@ -25,13 +25,13 @@ class PhpSerializeCoderTest extends TestBase
         $value = ['test1' => 111, 'test2' => 'ajshajhs', 'test3' => new stdClass()];
         $serializedValue = serialize($value);
 
-        $this->assertEquals($serializedValue, $this->coder->encode($value));
+        $this->assertEquals(['data' => $serializedValue], $this->coder->encode($value));
     }
 
     public function testDecode()
     {
         $value = ['test1' => 111, 'test2' => 'ajshajhs', 'test3' => new stdClass()];
-        $serializedValue = serialize($value);
+        $serializedValue = ['data' => serialize($value)];
 
         $this->assertEquals($value, $this->coder->decode($serializedValue));
     }

@@ -2,7 +2,6 @@
 
 namespace FHTeam\LaravelRedisCache\Tests;
 
-use Cache;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent\CollectionCoder;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent\ModelCoder;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent\PivotCoder;
@@ -24,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Seeder;
 use Illuminate\Foundation\Application;
 use Orchestra\Testbench\TestCase;
+use Redis;
 use stdClass;
 
 /**
@@ -35,7 +35,9 @@ class TestBase extends TestCase
 {
     public function tearDown()
     {
-        Cache::flush();
+        // Cache::flush();
+        Redis::connection('test_connection')->flushdb();
+        //TODO: check why provider has not connected our custom Redis store
     }
 
     /**
