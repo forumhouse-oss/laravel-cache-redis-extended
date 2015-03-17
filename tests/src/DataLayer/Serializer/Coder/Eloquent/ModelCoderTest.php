@@ -16,8 +16,8 @@ class ModelCoderTest extends DatabaseTestBase
 
     public function setUp()
     {
-        $this->coder = new ModelCoder();
         parent::setUp();
+        $this->coder = new ModelCoder();
     }
 
     public function testEncodeModelPlain()

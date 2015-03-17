@@ -18,9 +18,9 @@ class CollectionCoderTest extends DatabaseTestBase
 
     public function setUp()
     {
+        parent::setUp();
         $this->coder = new CollectionCoder();
         $this->coder->setCoderManager(new GenericCoderManager());
-        parent::setUp();
     }
 
     public function testEncodeCollectionPlain()

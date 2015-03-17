@@ -11,7 +11,7 @@ class DatabaseTestBase extends TestBase
     {
         parent::setUp();
 
-        $migrationsPath = 'tests/fixtures/Database/Migrations';
+        $migrationsPath = '../fixtures/Database/Migrations';
 
         if (!$migrationsPath) {
             throw new Exception("Migrations path does not exist");

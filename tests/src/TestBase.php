@@ -2,6 +2,7 @@
 
 namespace FHTeam\LaravelRedisCache\Tests;
 
+use Exception;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent\CollectionCoder;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent\ModelCoder;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent\PivotCoder;
@@ -45,10 +46,16 @@ class TestBase extends TestCase
      * Get base path.
      *
      * @return string
+     * @throws Exception
      */
     protected function getBasePath()
     {
-        return realpath(__DIR__.'/../../');
+        $basedir = realpath(__DIR__.'/../../tests/laravel');
+        if (!$basedir) {
+            throw new Exception("Base directory does not exist");
+        }
+
+        return $basedir;
     }
 
     /**

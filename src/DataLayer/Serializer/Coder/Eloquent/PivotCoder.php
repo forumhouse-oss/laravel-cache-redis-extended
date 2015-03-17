@@ -3,12 +3,9 @@
 namespace FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent;
 
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\CoderInterface;
-use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\CoderManagerTrait;
 
 class PivotCoder extends ModelCoder implements CoderInterface
 {
-    use CoderManagerTrait;
-
     /**
      * @param mixed $value
      *
