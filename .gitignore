@@ -6,4 +6,3 @@ Thumbs.db
 _ide_helper_models.php
 vendor
 composer.lock
-tests/laravel
