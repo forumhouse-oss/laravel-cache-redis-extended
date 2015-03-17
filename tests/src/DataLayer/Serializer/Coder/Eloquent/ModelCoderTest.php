@@ -4,6 +4,7 @@ namespace FHTeam\LaravelRedisCache\Tests\DataLayer\Serializer\Coder\Eloquent;
 
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\CoderInterface;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent\ModelCoder;
+use FHTeam\LaravelRedisCache\DataLayer\Serializer\GenericCoderManager;
 use FHTeam\LaravelRedisCache\Tests\DatabaseTestBase;
 use FHTeam\LaravelRedisCache\Tests\Fixtures\Database\Models\Bear;
 
@@ -18,6 +19,7 @@ class ModelCoderTest extends DatabaseTestBase
     {
         parent::setUp();
         $this->coder = new ModelCoder();
+        $this->coder->setCoderManager(new GenericCoderManager());
     }
 
     public function testEncodeModelPlain()
@@ -35,6 +37,12 @@ class ModelCoderTest extends DatabaseTestBase
                     'type' => "Grizzly",
                     'danger_level' => "8",
                 ],
+            'original' => [
+                'id' => "1",
+                'name' => "Lawly",
+                'type' => "Grizzly",
+                'danger_level' => "8",
+            ],
             'relations' => [],
         ];
 
@@ -49,14 +57,4 @@ class ModelCoderTest extends DatabaseTestBase
         $decodedBear = $this->coder->decode($encodedBear);
         $this->assertEquals($bear, $decodedBear);
     }
-
-    //public function testEncodeDecodeModelWithRelations()
-    //{
-    //    $bear = Bear::with('fish', 'trees', 'picnics')->first();
-    //
-    //    $this->assertInstanceOf(Bear::class, $bear);
-    //    $encodedBear = $this->coder->encode($bear);
-    //    $decodedBear = $this->coder->decode($encodedBear);
-    //    $this->assertEquals($bear, $decodedBear);
-    //}
 }

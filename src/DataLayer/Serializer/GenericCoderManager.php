@@ -20,6 +20,16 @@ class GenericCoderManager implements CoderManagerInterface
     protected $coderConfig = [];
 
     /**
+     * @var array
+     */
+    protected $decodeStack = [];
+
+    /**
+     * @var array
+     */
+    protected $encodeStack = [];
+
+    /**
      * @param null|array $config Configuration for coders or null to fetch from Laravel configuration
      *
      * @throws Exception
@@ -67,6 +77,50 @@ class GenericCoderManager implements CoderManagerInterface
         $this->assertEncodedValueValid($encoded, $coderClass);
 
         return ['coder' => $coderClass, 'data' => $encoded];
+    }
+
+    public function pushLastEncoded($value)
+    {
+        array_push($this->encodeStack, $value);
+    }
+
+    public function pushLastDecoded($value)
+    {
+        array_push($this->decodeStack, $value);
+    }
+
+    public function popLastEncoded()
+    {
+        array_pop($this->encodeStack);
+    }
+
+    public function popLastDecoded()
+    {
+        array_pop($this->decodeStack);
+    }
+
+    public function getLastDecoded($index = 0)
+    {
+        $count = count($this->decodeStack);
+        $itemIndex = $count - $index - 1;
+
+        if ($itemIndex < 0 || $itemIndex > ($count - 1)) {
+            throw new Exception("Decoded stack has no value with offset '$index'. Only $count items available");
+        }
+
+        return $this->decodeStack[$itemIndex];
+    }
+
+    public function getLastEncoded($index = 0)
+    {
+        $count = count($this->encodeStack);
+        $itemIndex = $count - $index - 1;
+
+        if ($itemIndex < 0 || $itemIndex > ($count - 1)) {
+            throw new Exception("Encoded stack has no value with offset '$index'. Only '$count' items available");
+        }
+
+        return $this->encodeStack[$itemIndex];
     }
 
     /**

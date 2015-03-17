@@ -2,6 +2,7 @@
 
 namespace FHTeam\LaravelRedisCache\DataLayer\Serializer;
 
+use App;
 use FHTeam\LaravelRedisCache\DataLayer\CacheItem;
 use FHTeam\LaravelRedisCache\TagVersion\TagVersionManagerInterface;
 use FHTeam\LaravelRedisCache\Utility\ArrayTools;
@@ -18,19 +19,13 @@ class GenericSerializer implements SerializerInterface
      * @var TagVersionManagerInterface
      */
     private $tagVersions;
-    /**
-     * @var CoderManagerInterface
-     */
-    private $coder;
 
     /**
      * @param TagVersionManagerInterface $tagVersionManager
-     * @param CoderManagerInterface      $coderManager
      */
-    public function __construct(TagVersionManagerInterface $tagVersionManager, CoderManagerInterface $coderManager)
+    public function __construct(TagVersionManagerInterface $tagVersionManager)
     {
         $this->tagVersions = $tagVersionManager;
-        $this->coder = $coderManager;
     }
 
     public function serialize($prefix, array $data, $minutes, $tags)
@@ -38,11 +33,13 @@ class GenericSerializer implements SerializerInterface
         $seconds = TimeTools::getTtlInSeconds($minutes);
         $tags = $this->tagVersions->getActualVersionsFor($tags);
         $data = ArrayTools::addPrefixToArrayKeys($prefix, $data);
+        /** @var CoderManagerInterface $coder */
+        $coder = App::make(CoderManagerInterface::class);
 
         $data = array_map(
-            function ($value) use ($seconds, $tags) {
+            function ($value) use ($seconds, $tags, $coder) {
                 return (string)CacheItem::encode(
-                    is_string($value) ? $value : $this->coder->encode($value),
+                    is_string($value) ? $value : $coder->encode($value),
                     $seconds,
                     $tags
                 );
@@ -65,6 +62,9 @@ class GenericSerializer implements SerializerInterface
             $data
         );
 
+        /** @var CoderManagerInterface $coder */
+        $coder = App::make(CoderManagerInterface::class);
+
         /** @var CacheItem[] $data */
         foreach ($data as &$item) {
             if ($item->isExpired()) {
@@ -78,7 +78,7 @@ class GenericSerializer implements SerializerInterface
             }
 
             $value = $item->getValue();
-            $item = is_string($value) ? $value : $this->coder->decode($value);
+            $item = is_string($value) ? $value : $coder->decode($value);
         }
 
         return $data;

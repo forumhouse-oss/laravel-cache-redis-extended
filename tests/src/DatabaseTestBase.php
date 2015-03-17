@@ -7,13 +7,14 @@ use FHTeam\LaravelRedisCache\Tests\Fixtures\Database\Seeds\DatabaseSeeder;
 
 class DatabaseTestBase extends TestBase
 {
+    protected $migrationsPath = '../fixtures/Database/Migrations';
+
     public function setUp()
     {
         parent::setUp();
 
-        $migrationsPath = '../fixtures/Database/Migrations';
-
-        if (!$migrationsPath) {
+        //TODO: validate directory existence
+        if (!$this->migrationsPath) {
             throw new Exception("Migrations path does not exist");
         }
 
@@ -21,7 +22,7 @@ class DatabaseTestBase extends TestBase
             'migrate',
             [
                 '--database' => 'test',
-                '--path' => $migrationsPath,
+                '--path' => $this->migrationsPath,
             ]
         );
 
@@ -31,6 +32,5 @@ class DatabaseTestBase extends TestBase
                 '--class' => DatabaseSeeder::class
             ]
         );
-
     }
 }
