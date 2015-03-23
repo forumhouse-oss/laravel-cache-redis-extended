@@ -1,6 +1,10 @@
 Extended Redis Support for Laravel 4 & 5
 =========================================
 
+This project is currently under development. Code most probably is broken. Please wait until 1.0 is released 
+to use it in production.
+
+
  Metrics | _
 ---|---
 Version | [![PHP version](https://badge.fury.io/ph/fhteam%2Flaravel-cache-redis-extended.svg)](http://badge.fury.io/ph/fhteam%2Flaravel-cache-redis-extended)
