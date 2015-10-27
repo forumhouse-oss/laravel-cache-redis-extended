@@ -1,8 +1,8 @@
-<?php namespace FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent;
+<?php namespace FHTeam\LaravelRedisCache\DataLayer\Coder\Eloquent;
 
 use Exception;
-use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\CoderInterface;
-use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\CoderManagerTrait;
+use FHTeam\LaravelRedisCache\DataLayer\Coder\CoderInterface;
+use FHTeam\LaravelRedisCache\DataLayer\Coder\CoderManagerTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class ModelCoder implements CoderInterface
