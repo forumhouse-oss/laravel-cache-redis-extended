@@ -1,7 +1,6 @@
-<?php
+<?php namespace FHTeam\LaravelRedisCache\Tests\DataLayer\Serializer\Coder\Eloquent;
 
-namespace FHTeam\LaravelRedisCache\Tests\DataLayer\Serializer\Coder\Eloquent;
-
+use Exception;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\CoderInterface;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent\ModelCoder;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\GenericCoderManager;
@@ -15,6 +14,9 @@ class PivotCoderTest extends DatabaseTestBase
      */
     protected $coder;
 
+    /**
+     * @throws Exception
+     */
     public function setUp()
     {
         parent::setUp();
@@ -29,9 +31,9 @@ class PivotCoderTest extends DatabaseTestBase
         $this->assertInstanceOf(Bear::class, $bear);
         $encodedBear = $this->coder->encode($bear);
         $decodedBear = $this->coder->decode($encodedBear);
-        $this->markTestIncomplete(
-            'Need to complete PivotCoder for this to pass'
-        );
+        //$this->markTestIncomplete(
+        //    'Need to complete PivotCoder for this to pass'
+        //);
         $this->assertEquals($bear, $decodedBear);
     }
 }

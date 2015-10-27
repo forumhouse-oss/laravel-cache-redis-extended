@@ -1,6 +1,4 @@
-<?php
-
-namespace FHTeam\LaravelRedisCache\DataLayer;
+<?php namespace FHTeam\LaravelRedisCache\DataLayer;
 
 /**
  * Handles wrapping and unwrapping values, that are stored into cache

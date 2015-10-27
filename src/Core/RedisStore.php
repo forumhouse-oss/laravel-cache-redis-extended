@@ -1,6 +1,4 @@
-<?php
-
-namespace FHTeam\LaravelRedisCache\Core;
+<?php namespace FHTeam\LaravelRedisCache\Core;
 
 use App;
 use Closure;

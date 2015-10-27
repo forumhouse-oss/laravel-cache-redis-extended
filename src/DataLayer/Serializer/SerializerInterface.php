@@ -1,6 +1,4 @@
-<?php
-
-namespace FHTeam\LaravelRedisCache\DataLayer\Serializer;
+<?php namespace FHTeam\LaravelRedisCache\DataLayer\Serializer;
 
 /**
  * Interface to be implemented by all serializers

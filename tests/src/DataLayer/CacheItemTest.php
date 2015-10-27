@@ -1,6 +1,4 @@
-<?php
-
-namespace FHTeam\LaravelRedisCache\Tests\DataLayer;
+<?php namespace FHTeam\LaravelRedisCache\Tests\DataLayer;
 
 use FHTeam\LaravelRedisCache\DataLayer\CacheItem;
 use FHTeam\LaravelRedisCache\Tests\TestBase;

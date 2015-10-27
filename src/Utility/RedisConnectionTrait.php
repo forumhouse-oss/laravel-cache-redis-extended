@@ -1,7 +1,4 @@
-<?php
-
-
-namespace FHTeam\LaravelRedisCache\Utility;
+<?php namespace FHTeam\LaravelRedisCache\Utility;
 
 use Illuminate\Redis\Database;
 

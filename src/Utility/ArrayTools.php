@@ -1,6 +1,4 @@
-<?php
-
-namespace FHTeam\LaravelRedisCache\Utility;
+<?php namespace FHTeam\LaravelRedisCache\Utility;
 
 /**
  * Low-level array tools

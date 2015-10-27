@@ -1,6 +1,4 @@
-<?php
-
-namespace FHTeam\LaravelRedisCache\Tests;
+<?php namespace FHTeam\LaravelRedisCache\Tests;
 
 use Exception;
 use FHTeam\LaravelRedisCache\Tests\Fixtures\Database\Seeds\DatabaseSeeder;
@@ -29,7 +27,7 @@ class DatabaseTestBase extends TestBase
         $this->artisan(
             'db:seed',
             [
-                '--class' => DatabaseSeeder::class
+                '--class' => DatabaseSeeder::class,
             ]
         );
     }

@@ -1,6 +1,4 @@
-<?php
-
-namespace FHTeam\LaravelRedisCache\Tests\DataLayer\Serializer\Coder\Eloquent;
+<?php namespace FHTeam\LaravelRedisCache\Tests\DataLayer\Serializer\Coder\Eloquent;
 
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\CoderInterface;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent\CollectionCoder;
@@ -42,7 +40,7 @@ class CollectionCoderTest extends DatabaseTestBase
                         'danger_level' => "8",
                     ],
                 'relations' => [],
-            ]
+            ],
         ];
     }
 

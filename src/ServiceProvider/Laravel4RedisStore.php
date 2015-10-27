@@ -1,6 +1,4 @@
-<?php
-
-namespace FHTeam\LaravelRedisCache\ServiceProvider;
+<?php namespace FHTeam\LaravelRedisCache\ServiceProvider;
 
 use FHTeam\LaravelRedisCache\Core\RedisStore;
 use Illuminate\Cache\StoreInterface;

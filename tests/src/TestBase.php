@@ -1,11 +1,8 @@
-<?php
-
-namespace FHTeam\LaravelRedisCache\Tests;
+<?php namespace FHTeam\LaravelRedisCache\Tests;
 
 use Exception;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent\CollectionCoder;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent\ModelCoder;
-use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent\PivotCoder;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\PhpSerializeCoder;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\CoderManagerInterface;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\GenericCoderManager;
@@ -20,7 +17,6 @@ use FHTeam\LaravelRedisCache\TagVersion\TagVersionManagerInterface;
 use Illuminate\Config\Repository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Seeder;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Redis as RedisFacade;
@@ -138,7 +134,7 @@ class TestBase extends TestCase
                     'host' => '127.0.0.1',
                     'port' => 6379,
                     'database' => 0,
-                ]
+                ],
             ]
         );
 
@@ -155,7 +151,6 @@ class TestBase extends TestCase
                 'connection' => 'test_connection',
                 'prefix' => 'prefix',
                 'coders' => [
-                    Pivot::class => PivotCoder::class,
                     Model::class => ModelCoder::class,
                     Collection::class => CollectionCoder::class,
                     stdClass::class => PhpSerializeCoder::class,
@@ -177,6 +172,7 @@ class TestBase extends TestCase
     protected function bindClasses($app)
     {
         $app->bind(TagVersionManagerInterface::class, TagVersionManager::class);
+
         $app->bind(
             TagVersionStorageInterface::class,
             function () use ($app) {
@@ -194,6 +190,7 @@ class TestBase extends TestCase
     protected function configureDatabase($app)
     {
         $app['config']->set('database.default', 'test');
+
         $app['config']->set(
             'database.connections.test',
             [

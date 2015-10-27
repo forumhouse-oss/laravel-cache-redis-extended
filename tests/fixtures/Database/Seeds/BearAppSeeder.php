@@ -37,7 +37,7 @@ class BearAppSeeder extends Seeder
                 'id' => 2,
                 'name' => 'Cerms',
                 'type' => 'Black',
-                'danger_level' => 4
+                'danger_level' => 4,
             )
         );
 
@@ -46,7 +46,7 @@ class BearAppSeeder extends Seeder
                 'id' => 3,
                 'name' => 'Adobot',
                 'type' => 'Polar',
-                'danger_level' => 3
+                'danger_level' => 3,
             )
         );
 
@@ -55,21 +55,21 @@ class BearAppSeeder extends Seeder
             array(
                 'id' => 1,
                 'weight' => 5,
-                'bear_id' => $bearLawly->id
+                'bear_id' => $bearLawly->id,
             )
         );
         Fish::create(
             array(
                 'id' => 2,
                 'weight' => 12,
-                'bear_id' => $bearCerms->id
+                'bear_id' => $bearCerms->id,
             )
         );
         Fish::create(
             array(
                 'id' => 3,
                 'weight' => 4,
-                'bear_id' => $bearAdobot->id
+                'bear_id' => $bearAdobot->id,
             )
         );
 
@@ -79,7 +79,7 @@ class BearAppSeeder extends Seeder
                 'id' => 1,
                 'type' => 'Redwood',
                 'age' => 500,
-                'bear_id' => $bearLawly->id
+                'bear_id' => $bearLawly->id,
             )
         );
         Tree::create(
@@ -87,7 +87,7 @@ class BearAppSeeder extends Seeder
                 'id' => 2,
                 'type' => 'Oak',
                 'age' => 400,
-                'bear_id' => $bearLawly->id
+                'bear_id' => $bearLawly->id,
             )
         );
 
@@ -96,14 +96,14 @@ class BearAppSeeder extends Seeder
             array(
                 'id' => 1,
                 'name' => 'Yellowstone',
-                'taste_level' => 6
+                'taste_level' => 6,
             )
         );
         $picnicGrandCanyon = Picnic::create(
             array(
                 'id' => 2,
                 'name' => 'Grand Canyon',
-                'taste_level' => 5
+                'taste_level' => 5,
             )
         );
 

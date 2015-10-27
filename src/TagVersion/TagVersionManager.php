@@ -1,6 +1,4 @@
-<?php
-
-namespace FHTeam\LaravelRedisCache\TagVersion;
+<?php namespace FHTeam\LaravelRedisCache\TagVersion;
 
 use FHTeam\LaravelRedisCache\TagVersion\Storage\TagVersionStorageInterface;
 

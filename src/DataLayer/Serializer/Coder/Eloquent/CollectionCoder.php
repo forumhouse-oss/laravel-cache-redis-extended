@@ -1,6 +1,4 @@
-<?php
-
-namespace FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent;
+<?php namespace FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent;
 
 use Exception;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\CoderInterface;
@@ -43,6 +41,7 @@ class CollectionCoder implements CoderInterface
         $result = [
             self::FIELD_COLLECTION_ITEMS => [],
         ];
+
         foreach ($value as $item) {
             $result[self::FIELD_COLLECTION_ITEMS][] = $this->encodeAny($item);
         }

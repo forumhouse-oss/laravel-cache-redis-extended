@@ -1,6 +1,4 @@
-<?php
-
-namespace FHTeam\LaravelRedisCache\Tests\DataLayer\Serializer\Coder;
+<?php namespace FHTeam\LaravelRedisCache\Tests\DataLayer\Serializer\Coder;
 
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\CoderInterface;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\PhpSerializeCoder;

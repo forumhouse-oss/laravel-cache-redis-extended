@@ -1,6 +1,4 @@
-<?php
-
-namespace FHTeam\LaravelRedisCache\Tests\Utility;
+<?php namespace FHTeam\LaravelRedisCache\Tests\Utility;
 
 use FHTeam\LaravelRedisCache\Tests\TestBase;
 use FHTeam\LaravelRedisCache\Utility\ArrayTools;

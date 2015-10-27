@@ -1,6 +1,4 @@
-<?php
-
-namespace FHTeam\LaravelRedisCache\Tests\DataLayer\Serializer\Coder\Eloquent;
+<?php namespace FHTeam\LaravelRedisCache\Tests\DataLayer\Serializer\Coder\Eloquent;
 
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\CoderInterface;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent\ModelCoder;
@@ -27,26 +25,7 @@ class ModelCoderTest extends DatabaseTestBase
         $bear = Bear::where('name', 'Lawly')->firstOrFail();
         $this->assertInstanceOf(Bear::class, $bear);
 
-        $expectedAttributes = [
-            'class' =>
-                Bear::class,
-            'attributes' =>
-                [
-                    'id' => "1",
-                    'name' => "Lawly",
-                    'type' => "Grizzly",
-                    'danger_level' => "8",
-                ],
-            'original' => [
-                'id' => "1",
-                'name' => "Lawly",
-                'type' => "Grizzly",
-                'danger_level' => "8",
-            ],
-            'relations' => [],
-        ];
-
-        $this->assertEquals($expectedAttributes, $this->coder->encode($bear));
+        $this->assertEquals($bear, $this->coder->decode($this->coder->encode($bear)));
     }
 
     public function testDecodeModelPlain()

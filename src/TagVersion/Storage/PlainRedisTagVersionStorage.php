@@ -1,6 +1,4 @@
-<?php
-
-namespace FHTeam\LaravelRedisCache\TagVersion\Storage;
+<?php namespace FHTeam\LaravelRedisCache\TagVersion\Storage;
 
 use Exception;
 use FHTeam\LaravelRedisCache\Utility\ArrayTools;

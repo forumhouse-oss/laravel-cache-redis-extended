@@ -1,6 +1,4 @@
-<?php
-
-namespace FHTeam\LaravelRedisCache\DataLayer\Serializer;
+<?php namespace FHTeam\LaravelRedisCache\DataLayer\Serializer;
 
 use Config;
 use Exception;

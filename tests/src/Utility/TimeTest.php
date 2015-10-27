@@ -1,6 +1,4 @@
-<?php
-
-namespace FHTeam\LaravelRedisCache\Tests\Utility;
+<?php namespace FHTeam\LaravelRedisCache\Tests\Utility;
 
 use Carbon\Carbon;
 use DateTime;

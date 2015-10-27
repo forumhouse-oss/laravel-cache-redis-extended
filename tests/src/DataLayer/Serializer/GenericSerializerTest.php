@@ -1,6 +1,4 @@
-<?php
-
-namespace FHTeam\LaravelRedisCache\Tests\DataLayer\Serializer;
+<?php namespace FHTeam\LaravelRedisCache\Tests\DataLayer\Serializer;
 
 use App;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\GenericCoderManager;

@@ -1,6 +1,4 @@
-<?php
-
-namespace FHTeam\LaravelRedisCache\Tests\TagVersion\Storage;
+<?php namespace FHTeam\LaravelRedisCache\Tests\TagVersion\Storage;
 
 use App;
 use Exception;

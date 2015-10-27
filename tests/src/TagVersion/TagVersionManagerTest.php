@@ -1,6 +1,4 @@
-<?php
-
-namespace FHTeam\LaravelRedisCache\Tests\TagVersion;
+<?php namespace FHTeam\LaravelRedisCache\Tests\TagVersion;
 
 use App;
 use FHTeam\LaravelRedisCache\TagVersion\Storage\PlainRedisTagVersionStorage;
