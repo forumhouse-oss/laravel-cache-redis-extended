@@ -1,6 +1,7 @@
 <?php namespace FHTeam\LaravelRedisCache\Tests\DataLayer\Serializer;
 
 use App;
+use Carbon\Carbon;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\GenericCoderManager;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\GenericSerializer;
 use FHTeam\LaravelRedisCache\TagVersion\Storage\PlainRedisTagVersionStorage;
@@ -10,6 +11,12 @@ use FHTeam\LaravelRedisCache\TagVersion\TagVersionManagerInterface;
 use FHTeam\LaravelRedisCache\Tests\TestBase;
 use stdClass;
 
+/**
+ * Class GenericSerializerTest
+ *
+ * @medium
+ * @package FHTeam\LaravelRedisCache\Tests\DataLayer\Serializer
+ */
 class GenericSerializerTest extends TestBase
 {
     /**
@@ -53,6 +60,24 @@ class GenericSerializerTest extends TestBase
         $serialized = $serializer->serialize($prefix, $data, $minutes, $tags);
 
         $this->assertEquals($data, $serializer->deserialize($prefix, $serialized));
+    }
+
+    public function testSerializeDeserializeExpired()
+    {
+        $prefix = 'prefix:';
+
+
+        $data = [
+            'key1' => 'StringThing',
+        ];
+
+        $tags = ['Tag1', 'Tag2'];
+
+        $serializer = new GenericSerializer($this->manager, $this->coderManager);
+        $serialized = $serializer->serialize($prefix, $data, Carbon::now(), $tags);
+        sleep(1);
+
+        $this->assertEquals(['key1' => null], $serializer->deserialize($prefix, $serialized));
     }
 
     public function testSerializeDeserializeWithCoders()
