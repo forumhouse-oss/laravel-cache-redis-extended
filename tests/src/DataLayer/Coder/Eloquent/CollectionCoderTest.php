@@ -1,7 +1,7 @@
-<?php namespace FHTeam\LaravelRedisCache\Tests\DataLayer\Serializer\Coder\Eloquent;
+<?php namespace FHTeam\LaravelRedisCache\Tests\DataLayer\Coder\Eloquent;
 
-use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\CoderInterface;
-use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent\CollectionCoder;
+use FHTeam\LaravelRedisCache\DataLayer\Coder\CoderInterface;
+use FHTeam\LaravelRedisCache\DataLayer\Coder\Eloquent\CollectionCoder;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\GenericCoderManager;
 use FHTeam\LaravelRedisCache\Tests\DatabaseTestBase;
 use FHTeam\LaravelRedisCache\Tests\Fixtures\Database\Models\Bear;

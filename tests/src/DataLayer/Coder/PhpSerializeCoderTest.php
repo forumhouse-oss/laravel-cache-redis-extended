@@ -1,7 +1,7 @@
-<?php namespace FHTeam\LaravelRedisCache\Tests\DataLayer\Serializer\Coder;
+<?php namespace FHTeam\LaravelRedisCache\Tests\DataLayer\Coder;
 
-use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\CoderInterface;
-use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\PhpSerializeCoder;
+use FHTeam\LaravelRedisCache\DataLayer\Coder\CoderInterface;
+use FHTeam\LaravelRedisCache\DataLayer\Coder\PhpSerializeCoder;
 use FHTeam\LaravelRedisCache\Tests\TestBase;
 use stdClass;
 

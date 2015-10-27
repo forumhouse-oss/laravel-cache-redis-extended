@@ -1,18 +1,22 @@
-<?php namespace FHTeam\LaravelRedisCache\Tests\DataLayer\Serializer\Coder\Eloquent;
+<?php namespace FHTeam\LaravelRedisCache\Tests\DataLayer\Coder\Eloquent;
 
-use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\CoderInterface;
-use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent\ModelCoder;
+use Exception;
+use FHTeam\LaravelRedisCache\DataLayer\Coder\CoderInterface;
+use FHTeam\LaravelRedisCache\DataLayer\Coder\Eloquent\ModelCoder;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\GenericCoderManager;
 use FHTeam\LaravelRedisCache\Tests\DatabaseTestBase;
 use FHTeam\LaravelRedisCache\Tests\Fixtures\Database\Models\Bear;
 
-class ModelCoderTest extends DatabaseTestBase
+class PivotCoderTest extends DatabaseTestBase
 {
     /**
      * @var CoderInterface
      */
     protected $coder;
 
+    /**
+     * @throws Exception
+     */
     public function setUp()
     {
         parent::setUp();
@@ -20,20 +24,16 @@ class ModelCoderTest extends DatabaseTestBase
         $this->coder->setCoderManager(new GenericCoderManager());
     }
 
-    public function testEncodeModelPlain()
+    public function testEncodeDecodeModelWithRelations()
     {
-        $bear = Bear::where('name', 'Lawly')->firstOrFail();
-        $this->assertInstanceOf(Bear::class, $bear);
+        $bear = Bear::with('picnics')->first();
 
-        $this->assertEquals($bear, $this->coder->decode($this->coder->encode($bear)));
-    }
-
-    public function testDecodeModelPlain()
-    {
-        $bear = Bear::where('name', 'Lawly')->firstOrFail();
         $this->assertInstanceOf(Bear::class, $bear);
         $encodedBear = $this->coder->encode($bear);
         $decodedBear = $this->coder->decode($encodedBear);
+        //$this->markTestIncomplete(
+        //    'Need to complete PivotCoder for this to pass'
+        //);
         $this->assertEquals($bear, $decodedBear);
     }
 }
