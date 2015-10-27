@@ -2,7 +2,7 @@
 
 use Config;
 use Exception;
-use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\CoderInterface;
+use FHTeam\LaravelRedisCache\DataLayer\Coder\CoderInterface;
 use Illuminate\Foundation\Application;
 
 /**
