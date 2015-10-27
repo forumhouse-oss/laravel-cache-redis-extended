@@ -1,5 +1,7 @@
 <?php namespace FHTeam\LaravelRedisCache\DataLayer\Serializer;
 
+use Carbon\Carbon;
+
 /**
  * Interface to be implemented by all serializers
  *
@@ -10,15 +12,14 @@ interface SerializerInterface
     /**
      * Prepares data to be sent to the cache using any command
      *
-     * @param       $prefix
-     * @param array $data
-     * @param int   $minutes
-     * @param       $tags
+     * @param string     $prefix
+     * @param array      $data
+     * @param int|Carbon $minutes
+     * @param string[]   $tags
      *
      * @return array
-     * @throws \Exception
      */
-    public function serialize($prefix, array $data, $minutes, $tags);
+    public function serialize($prefix, array $data, $minutes, array $tags);
 
     /**
      * @param string $prefix
