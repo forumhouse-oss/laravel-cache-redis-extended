@@ -11,7 +11,7 @@ class CacheItem
      * Fields of the serialized object in cache
      */
 
-    /** When this object expire: int */
+    /** When this object expire (UnixTime): int */
     const IDX_EXPIRES = 'expires';
 
     /** Object tags: string name => int version */
@@ -39,15 +39,15 @@ class CacheItem
      * @param mixed    $value
      * @param int      $ttl
      * @param array    $tags
-     * @param null|int $now
+     * @param bool|int $expiresAt
      *
      * @return CacheItem
      */
-    public static function encode($value, $ttl, array $tags = [], $now = null)
+    public static function encode($value, $ttl, array $tags = [], $expiresAt = false)
     {
         $obj = new static();
         $obj->setValue($value);
-        $obj->setExpires(($now ?: time()) + $ttl);
+        $obj->setExpires(($expiresAt ?: time()) + $ttl);
         $obj->setTags($tags);
 
         return $obj;
