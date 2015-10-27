@@ -1,6 +1,5 @@
 <?php namespace FHTeam\LaravelRedisCache\DataLayer\Serializer;
 
-use App;
 use FHTeam\LaravelRedisCache\DataLayer\CacheItem;
 use FHTeam\LaravelRedisCache\TagVersion\TagVersionManagerInterface;
 use FHTeam\LaravelRedisCache\Utility\ArrayTools;
@@ -17,34 +16,36 @@ class GenericSerializer implements SerializerInterface
      * @var TagVersionManagerInterface
      */
     private $tagVersions;
+    /**
+     * @var CoderManagerInterface
+     */
+    private $coderManager;
 
     /**
      * @param TagVersionManagerInterface $tagVersionManager
+     * @param CoderManagerInterface      $coderManager
      */
-    public function __construct(TagVersionManagerInterface $tagVersionManager)
+    public function __construct(TagVersionManagerInterface $tagVersionManager, CoderManagerInterface $coderManager)
     {
         $this->tagVersions = $tagVersionManager;
+        $this->coderManager = $coderManager;
     }
 
-    public function serialize($prefix, array $data, $minutes, $tags)
+    public function serialize($prefix, array $data, $minutes, array $tags)
     {
         $seconds = TimeTools::getTtlInSeconds($minutes);
         $tags = $this->tagVersions->getActualVersionsFor($tags);
         $data = ArrayTools::addPrefixToArrayKeys($prefix, $data);
-        /** @var CoderManagerInterface $coder */
-        $coder = App::make(CoderManagerInterface::class);
-
         $data = array_map(
-            function ($value) use ($seconds, $tags, $coder) {
+            function ($value) use ($seconds, $tags) {
                 return (string)CacheItem::encode(
-                    $this->isSimpleType($value) ? $value : $coder->encode($value),
+                    $this->isSimpleType($value) ? $value : $this->coderManager->encode($value),
                     $seconds,
                     $tags
                 );
             },
             $data
         );
-
 
         return $data;
     }
@@ -60,9 +61,6 @@ class GenericSerializer implements SerializerInterface
             $data
         );
 
-        /** @var CoderManagerInterface $coder */
-        $coder = App::make(CoderManagerInterface::class);
-
         /** @var CacheItem[] $data */
         foreach ($data as &$item) {
             if ($item->isExpired()) {
@@ -76,7 +74,7 @@ class GenericSerializer implements SerializerInterface
             }
 
             $value = $item->getValue();
-            $item = $this->isSimpleType($value) ? $value : $coder->decode($value);
+            $item = $this->isSimpleType($value) ? $value : $this->coderManager->decode($value);
         }
 
         return $data;
