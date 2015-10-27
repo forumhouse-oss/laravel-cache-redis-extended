@@ -7,6 +7,12 @@ use FHTeam\LaravelRedisCache\Tests\DatabaseTestBase;
 use FHTeam\LaravelRedisCache\Tests\Fixtures\Database\Models\Bear;
 use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * Class CollectionCoderTest
+ *
+ * @medium
+ * @package FHTeam\LaravelRedisCache\Tests\DataLayer\Coder\Eloquent
+ */
 class CollectionCoderTest extends DatabaseTestBase
 {
     /**

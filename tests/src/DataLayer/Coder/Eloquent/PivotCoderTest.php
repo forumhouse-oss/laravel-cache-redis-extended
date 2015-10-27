@@ -7,6 +7,12 @@ use FHTeam\LaravelRedisCache\DataLayer\Serializer\GenericCoderManager;
 use FHTeam\LaravelRedisCache\Tests\DatabaseTestBase;
 use FHTeam\LaravelRedisCache\Tests\Fixtures\Database\Models\Bear;
 
+/**
+ * Class PivotCoderTest
+ *
+ * @medium
+ * @package FHTeam\LaravelRedisCache\Tests\DataLayer\Coder\Eloquent
+ */
 class PivotCoderTest extends DatabaseTestBase
 {
     /**

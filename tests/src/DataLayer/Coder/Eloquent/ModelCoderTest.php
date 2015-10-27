@@ -6,6 +6,12 @@ use FHTeam\LaravelRedisCache\DataLayer\Serializer\GenericCoderManager;
 use FHTeam\LaravelRedisCache\Tests\DatabaseTestBase;
 use FHTeam\LaravelRedisCache\Tests\Fixtures\Database\Models\Bear;
 
+/**
+ * Class ModelCoderTest
+ *
+ * @medium
+ * @package FHTeam\LaravelRedisCache\Tests\DataLayer\Coder\Eloquent
+ */
 class ModelCoderTest extends DatabaseTestBase
 {
     /**
