@@ -41,9 +41,11 @@ class GenericSerializerTest extends TestBase
             'key1' => 'StringThing',
             'key2' => 'string_thing2',
             'key3' => 'string_thing_3',
+            'key4' => 1234,
+            'key6' => true,
         ];
 
-        $minutes = 121212;
+        $minutes = 4321;
 
         $tags = ['Tag1', 'Tag2'];
 
