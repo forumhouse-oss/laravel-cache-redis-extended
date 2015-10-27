@@ -4,6 +4,7 @@ use App;
 use FHTeam\LaravelRedisCache\TagVersion\Storage\PlainRedisTagVersionStorage;
 use FHTeam\LaravelRedisCache\TagVersion\TagVersionManager;
 use FHTeam\LaravelRedisCache\Tests\TestBase;
+use Illuminate\Redis\Database;
 
 class TagVersionManagerTest extends TestBase
 {
@@ -20,7 +21,12 @@ class TagVersionManagerTest extends TestBase
     public function setUp()
     {
         parent::setUp();
-        $this->storage = new PlainRedisTagVersionStorage(App::make('redis'), 'test_connection', 'prefix');
+
+        /** @var Database $redis */
+        $redis = App::make('redis');
+        $redis->connection('test_connection')->flushall();
+
+        $this->storage = new PlainRedisTagVersionStorage($redis, 'test_connection', 'prefix');
         $this->manager = new TagVersionManager($this->storage);
     }
 

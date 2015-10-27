@@ -5,6 +5,7 @@ use Exception;
 use FHTeam\LaravelRedisCache\TagVersion\Storage\PlainRedisTagVersionStorage;
 use FHTeam\LaravelRedisCache\TagVersion\Storage\TagVersionStorageInterface;
 use FHTeam\LaravelRedisCache\Tests\TestBase;
+use Illuminate\Redis\Database;
 
 class PlainRedisTagVersionStorageTest extends TestBase
 {
@@ -16,6 +17,11 @@ class PlainRedisTagVersionStorageTest extends TestBase
     public function setUp()
     {
         parent::setUp();
+
+        /** @var Database $redis */
+        $redis = App::make('redis');
+        $redis->connection('test_connection')->flushall();
+
         $this->storage = new PlainRedisTagVersionStorage(App::make('redis'), 'test_connection', 'prefix');
     }
 
