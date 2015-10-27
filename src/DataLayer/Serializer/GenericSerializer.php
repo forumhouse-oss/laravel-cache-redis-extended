@@ -37,7 +37,7 @@ class GenericSerializer implements SerializerInterface
         $data = array_map(
             function ($value) use ($seconds, $tags, $coder) {
                 return (string)CacheItem::encode(
-                    is_string($value) ? $value : $coder->encode($value),
+                    $this->isSimpleType($value) ? $value : $coder->encode($value),
                     $seconds,
                     $tags
                 );
@@ -76,9 +76,19 @@ class GenericSerializer implements SerializerInterface
             }
 
             $value = $item->getValue();
-            $item = is_string($value) ? $value : $coder->decode($value);
+            $item = $this->isSimpleType($value) ? $value : $coder->decode($value);
         }
 
         return $data;
+    }
+
+    /**
+     * @param $value
+     *
+     * @return bool
+     */
+    protected function isSimpleType($value)
+    {
+        return is_numeric($value) || is_string($value) || is_bool($value);
     }
 }
