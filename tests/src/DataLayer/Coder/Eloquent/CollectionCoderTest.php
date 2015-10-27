@@ -28,28 +28,6 @@ class CollectionCoderTest extends DatabaseTestBase
         $this->assertCount(1, $bears);
         $this->assertInstanceOf(Bear::class, $bears[0]);
 
-        $expectedAttributes = [
-            'items' => [
-                'class' =>
-                    Bear::class,
-                'attributes' =>
-                    [
-                        'id' => "1",
-                        'name' => "Lawly",
-                        'type' => "Grizzly",
-                        'danger_level' => "8",
-                    ],
-                'relations' => [],
-            ],
-        ];
+        $this->assertEquals($bears, $this->coder->decode($this->coder->encode($bears)));
     }
-
-    //public function testEncodeDecodeCollection()
-    //{
-    //    $bears = Bear::with('fish', 'trees', 'picnics')->get();
-    //    $this->assertInstanceOf(Collection::class, $bears);
-    //    $encodedBears = $this->coder->encode($bears);
-    //    $decodedBears = $this->coder->decode($encodedBears);
-    //    $this->assertEquals($bears, $decodedBears);
-    //}
 }

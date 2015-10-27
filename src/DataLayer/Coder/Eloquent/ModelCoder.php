@@ -27,7 +27,7 @@ class ModelCoder implements CoderInterface
      */
     public function decode($value)
     {
-        return unserialize($value);
+        return unserialize($value['data']);
     }
 
     /**
@@ -42,6 +42,6 @@ class ModelCoder implements CoderInterface
             throw new Exception("Cannot encode value of class '".get_class($value)."'");
         }
 
-        return serialize($value);
+        return ['data' => serialize($value)];
     }
 }
