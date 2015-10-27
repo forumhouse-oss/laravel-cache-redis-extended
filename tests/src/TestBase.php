@@ -1,9 +1,9 @@
 <?php namespace FHTeam\LaravelRedisCache\Tests;
 
 use Exception;
-use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent\CollectionCoder;
-use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\Eloquent\ModelCoder;
-use FHTeam\LaravelRedisCache\DataLayer\Serializer\Coder\PhpSerializeCoder;
+use FHTeam\LaravelRedisCache\DataLayer\Coder\Eloquent\CollectionCoder;
+use FHTeam\LaravelRedisCache\DataLayer\Coder\Eloquent\ModelCoder;
+use FHTeam\LaravelRedisCache\DataLayer\Coder\PhpSerializeCoder;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\CoderManagerInterface;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\GenericCoderManager;
 use FHTeam\LaravelRedisCache\DataLayer\Serializer\GenericSerializer;
