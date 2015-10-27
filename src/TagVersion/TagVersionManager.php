@@ -11,6 +11,9 @@ class TagVersionManager implements TagVersionManagerInterface
 {
     protected $storage;
 
+    /**
+     * @param TagVersionStorageInterface $storage
+     */
     public function __construct(TagVersionStorageInterface $storage)
     {
         $this->storage = $storage;
@@ -25,6 +28,7 @@ class TagVersionManager implements TagVersionManagerInterface
         $this->storage->cacheTagVersions($tagNames);
 
         $result = [];
+
         foreach ($tagNames as $tagName) {
             $result[$tagName] = $this->storage->getTagVersion($tagName);
         }
@@ -35,6 +39,7 @@ class TagVersionManager implements TagVersionManagerInterface
     public function isAnyTagExpired(array $tags)
     {
         $this->storage->cacheTagVersions(array_keys($tags));
+
         foreach ($tags as $tagName => $tagVersion) {
             if ($tagVersion < $this->storage->getTagVersion($tagName)) {
                 return true;
